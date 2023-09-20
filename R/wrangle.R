@@ -103,7 +103,7 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   write.csv(allUnpooled, paste0(outputPath, "/", fileName, "_unpooled.csv"), row.names = FALSE)
   write.csv(allPooled, paste0(outputPath, "/", fileName, "_pooled.csv"), row.names = FALSE)
   
-  message("Completed. Check the output folder for the wrangled .csv files.\n")
+  message("\nCompleted. Check the output folder for the wrangled .csv files.\n")
   
   
 } # end wrangle_fluxdata().
