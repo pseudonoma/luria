@@ -44,13 +44,25 @@ get_mutation_rates <- function(dataPath, projNames, repTag, theme = NULL, export
     
     # optional: overlay
     if(!is.null(theme)){
-      plot <- overlay_means_classic(plotObject = plot, theme = theme, yLabel = "Mutation rate")
+      plot <- tryCatch(
+        overlay_means_classic(plotObject = plot, theme = theme, yLabel = "Mutation rate"),
+        error = function(e){
+          message("Aesthetic overlays are part of package \"poirot\" and not currently available :(")
+        }
+      )
     }
     
     # Handle export (plots)
     if(export == "plot" | export == "both"){
       plotName <- paste0(project, "_combined")
-      auto_export(plot, plotName, dimensions = "postcard")
+      tryCatch(
+        auto_export(plot, plotName, dimensions = "postcard"),
+        error = function(e){
+          message("Plot exporting is part of package \"poirot\" and not currently available :(")
+        }
+        
+      )
+      
     }
     
   }
