@@ -45,7 +45,7 @@ get_mutation_rates <- function(dataPath, projNames, repTag, theme = NULL, export
     # optional: overlay
     if(!is.null(theme)){
       plot <- tryCatch(
-        overlay_means_classic(plotObject = plot, theme = theme, yLabel = "Mutation rate"),
+        overlay_dotplot_borderless(plotObject = plot, theme = theme, yLabel = "Mutation rate"),
         error = function(e){
           message("Aesthetic overlays are part of package \"poirot\" and not currently available :(")
         }
