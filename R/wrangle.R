@@ -20,7 +20,7 @@
 #' @param exclude A vector of sheet names to skip. By default the sheet "Summary" is skipped, but
 #' more can be added.
 #' @param save A pathname for exporting the final CSVs to. Defaults to NULL, in which case the CSVs
-#' are exported to a folder called `analyzed`
+#' are exported to a folder called `wrangled`
 #'                 
 #' @examples
 #' wrangle_fluxdata(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
@@ -84,12 +84,12 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   
   # Handle export pathing
   if(is.null(save)){
-    message("\nNo output folder defined, creating default folder /analyzed/")
-    if(dir.exists("./analyzed")){
+    message("\nNo output folder defined, creating default folder /wrangled/")
+    if(dir.exists("./wrangled")){
       warning("The specified output folder already exists! Files may have been overwritten.")
     }
-    dir.create("./analyzed", showWarnings = FALSE)
-    outputPath <- "./analyzed"
+    dir.create("./wrangled", showWarnings = FALSE)
+    outputPath <- "./wrangled"
   } else {
     if(dir.exists(save)){
       warning("The specified output folder already exists! Files may have been overwritten.")
@@ -103,7 +103,7 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   write.csv(allUnpooled, paste0(outputPath, "/", fileName, "_unpooled.csv"), row.names = FALSE)
   write.csv(allPooled, paste0(outputPath, "/", fileName, "_pooled.csv"), row.names = FALSE)
   
-  message("\nCompleted. Check the output folder for the wrangled .csv files.\n")
+  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
   
 } # end wrangle_fluxdata().

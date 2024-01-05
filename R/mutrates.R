@@ -1,5 +1,5 @@
 # get_mutation_rates()
-# takes fluxxer.R outputs, plots, and/or extracts mutation rates
+# takes fluxxer.R outputs, produces plots and/or extracts mutation rates
 
 # required from "poirot"
 # overlay_means_classic()
