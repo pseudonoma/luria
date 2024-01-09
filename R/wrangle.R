@@ -109,6 +109,57 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 } # end wrangle_fluxdata().
 
 
+#' Reduced version of auto_intermediates()
+#' Runs on a single CSV supplied via <dataFile>, turns it into standard pooled/unpooled format
+#'   as if it came from wrangle_fluxdata().
+
+wrangle_intermediate <- function(dataFile, poolAs = NULL, exclude = NULL, saveAs = NULL){
+  # ARGS:
+  # dataFile - Should be a single file? If saveAs is option, then files should be passed indiv'lly
+  # poolAs - Name to replace strain name for pooling.
+  # exclude - Individual strain names to drop; applied before pooling etc.
+  # saveAs - <saveAs>_unpooled.csv
+  
+  ###
+  
+  # Check the CSV file has correct headers
+  headers <- c("strain", "plate", "fraction", "CFU")
+  df <- read.csv(dataFile)
+  if(!all(headers %in% names(df))){
+    stop("The supplied file does not have the correct column names. Check them and try again.")
+  }
+  
+  # Crudely separate pooled/unpooled data, sans excluded strains
+  pooledData <- df[!(df$strain %in% exclude), ]
+  unpooledData <- df[!(df$strain %in% exclude), ]
+  if(is.null(poolAs)){
+    pooledData$strain <- "Combined"
+  } else {
+    pooledData$strain <- poolAs
+  }
+  
+  # Handle export pathing/name overrides
+  prep_export(mode = "wrangled")
+  exportPath <- "./output/wrangled"
+  
+  if(is.null(saveAs)){
+    # extract basename & construct exportName
+    baseName <- sub(".csv", "", basename(dataFile))
+    exportName <- paste0(exportPath, "/", baseName)
+  } else {
+    # or construct using <saveAs> value
+    exportName <- paste0(exportPath, "/", saveAs)
+  }
+  
+  write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
+  write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
+  
+  
+  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
+  
+}
+
+
 #' Helper function for converting sheet data
 #' 
 #' This function is internally called by wrangle_fluxdata.
@@ -148,3 +199,39 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
   return(currentData)
   
 } # end populate_rows(). #
+
+
+#' prep_export()
+#' 
+#' Helper function that handles folder structure and pathing checks. Exporting is still handled by
+#' the calling function, this one just sets up the folders.
+
+prep_export <- function(mode = NULL){
+  
+  # Define top-level path
+  if(dir.exists("./output")){
+    warning("Default output folder already exists - files may have been overwritten!")
+  }
+  outputPath <- "./output"
+  dir.create(outputPath, showWarnings = FALSE)
+  
+  # Create the standard folders
+  if(mode == "wrangled"){
+    wrangledPath <- paste0(outputPath, "/wrangled")
+    if(dir.exists(wrangledPath)){
+      warning("The output folder /wrangled/ already exists! Files may have been overwritten.")
+    }
+    dir.create(wrangledPath, showWarnings = FALSE)
+    
+  } else if(mode == "analyzed"){
+    analyzedPath <- paste0(outputPath, "/analyzed")
+    if(dir.exists(analyzedPath)){
+      warning("The output folder /analyzed/ already exists! Files may have been overwritten.")
+    }
+    dir.create(analyzedPath, showWarnings = FALSE)
+    
+  } else if(is.null(mode)){
+    stop("prep_export mode is NULL! This shouldn't have happened, please report this bug.")
+  }
+  
+}
