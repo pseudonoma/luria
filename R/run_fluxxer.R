@@ -1,5 +1,5 @@
 # run_fluxxer()
-# Wrapper function that calls neatly calls calculateMutRate() on all files in /wrangled/.
+# Wrapper function that neatly calls calculateMutRate() on all files in /wrangled/.
 # Also sets up some standard pathing etc. before calling calculateMutRate().
 
 run_fluxxer <- function(dataPath = NULL, poolAs = NULL){
@@ -17,12 +17,13 @@ run_fluxxer <- function(dataPath = NULL, poolAs = NULL){
   }
   
   # Create output folder
-  outputPath <- paste0(dataPath, "/analyzed")
-  if(dir.exists(outputPath)){
-    warning("The output folder /analyzed/ already exists - files may have been overwritten.")
-  } else {
-    dir.create(outputPath, showWarnings = FALSE)
-  }
+  prep_export(mode = "analyzed")
+  # outputPath <- paste0(dataPath, "/analyzed")
+  # if(dir.exists(outputPath)){
+  #   warning("The output folder /analyzed/ already exists - files may have been overwritten.")
+  # } else {
+  #   dir.create(outputPath, showWarnings = FALSE)
+  # }
   
   # Define pooled/unpooled filenames
   pooledList <- grep("_pooled", dir(inputPath), value = TRUE)
@@ -47,4 +48,3 @@ run_fluxxer <- function(dataPath = NULL, poolAs = NULL){
   message("\nDone. Check /analyzed/ for outputs.\n")
   
 }
-
