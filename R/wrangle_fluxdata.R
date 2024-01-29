@@ -1,5 +1,6 @@
 #' Wrangle and convert fluctuation test data
 #'
+#' [***REWRITE THIS***]
 #' This function wrangles raw fluctuation test data, converting it into a format ready for use
 #' with the Barrick Lab's [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
 #' script. `fluxxer.R` in turn calls functions from the rSalvador package.
@@ -33,7 +34,7 @@
 #'
 #' @export
 
-wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
+wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
                              poolAs = NULL, exclude = "Summary", save = NULL){
   
   # Prep some variables
@@ -41,7 +42,7 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   sheetNames <- allSheets[!allSheets %in% exclude] # only unexcluded sheet names
   countFraction <- countFract["P"]/(countFract["C"] * countFract["D"])
   if(is.na(countFraction)){
-    stop("Couldn't calculate Count plating fraction. Check that countVars is a named vector!")
+    stop("Couldn't calculate Count plating fraction; check that countFract is a named vector.")
   }
   
   # Prep the two master dfs
@@ -82,26 +83,23 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
     
   } # loop exit #
   
-  # Handle export pathing
-  if(is.null(save)){
-    message("\nNo output folder defined, creating default folder /wrangled/")
-    if(dir.exists("./wrangled")){
-      warning("The specified output folder already exists! Files may have been overwritten.")
-    }
-    dir.create("./wrangled", showWarnings = FALSE)
-    outputPath <- "./wrangled"
+  # Handle exporting using export helper function
+  prep_export(mode = "wrangled")
+  exportPath <- "./output/wrangled"
+  
+  # Construct export filename
+  if(is.null(saveAs)){
+    # extract basename & construct exportName
+    baseName <- sub(".csv", "", basename(dataFile))
+    exportName <- paste0(exportPath, "/", baseName)
   } else {
-    if(dir.exists(save)){
-      warning("The specified output folder already exists! Files may have been overwritten.")
-    }
-    dir.create(save, showWarnings = FALSE)
-    outputPath <- save
+    # or construct using <saveAs> value
+    exportName <- paste0(exportPath, "/", saveAs)
   }
   
-  # Export and report
-  fileName <- sub(".xlsx", "", basename(dataFile))
-  write.csv(allUnpooled, paste0(outputPath, "/", fileName, "_unpooled.csv"), row.names = FALSE)
-  write.csv(allPooled, paste0(outputPath, "/", fileName, "_pooled.csv"), row.names = FALSE)
+  # Write file and report
+  write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
+  write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
   
   message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
