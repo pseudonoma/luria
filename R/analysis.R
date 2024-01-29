@@ -9,16 +9,16 @@ calculateMutRate <- function(dataPath,
   # require libraries:
   suppressMessages(library(rsalvador))
   suppressMessages(library(tidyverse))
-  suppressMessages(library(cowplot))
-  suppressMessages(library(optparse))
+  # suppressMessages(library(cowplot))
+  # suppressMessages(library(optparse))
   
-  if ((output_prefix!= "") && !grepl('[./]$', output_prefix)) {
-    output_prefix = paste0(output_prefix, ".")
-  }
-  
-  if (is.null(filename)) {
-    stop("No valid file supplied.")
-  }
+  # if ((output_prefix!= "") && !grepl('[./]$', output_prefix)) {
+  #   output_prefix = paste0(output_prefix, ".")
+  # }
+  # 
+  # if (is.null(filename)) {
+  #   stop("No valid file supplied.")
+  # }
   
   #read in file specified. Must be in same directory
   #for testing
