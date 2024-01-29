@@ -48,11 +48,11 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
 prep_export <- function(mode = NULL){
   
   # Define top-level path
-  if(dir.exists("./output")){
-    warning("Default output folder already exists - files may have been overwritten!")
+  if(!dir.exists("./output")){
+    outputPath <- "./output"
+    dir.create(outputPath, showWarnings = FALSE)
+    warning("Created ./output/ folder for pipeline results.")
   }
-  outputPath <- "./output"
-  dir.create(outputPath, showWarnings = FALSE)
   
   # Create the standard folders
   if(mode == "wrangled"){
