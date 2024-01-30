@@ -1,5 +1,5 @@
 # run_fluxxer()
-# Wrapper function that neatly calls calculateMutRate() on all files in /wrangled/.
+# Wrapper function that neatly calls calculateMutRate().
 # Also sets up some standard pathing etc. before calling calculateMutRate().
 
 run_fluxxer <- function(file = NULL, comparisons = TRUE){
@@ -11,7 +11,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
   
   ###
   
-  # Set mode based on whether individual file is supplied
+  # Set mode explicitly for my own sanity
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
   # Create standard output folders regardless of mode
