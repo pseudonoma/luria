@@ -3,13 +3,22 @@
 
 ###
 
+unlink("./output", recursive = TRUE) # remove /output/ since there's a stop() call
 source("./R/helpers.R")
+
+###
+# Part 1: Wrangle
 source("./R/wrangle_raw_data.R")
 source("./R/wrangle_clean_data.R")
 testRaw <- ("./data/testing 2024 01 30/test_raw.xlsx")
 testWrangled <- ("./data/testing 2024 01 30/test_wrangled.csv")
 
-###
-unlink("./output", recursive = TRUE) # remove /output/ since there's a stop() call
 wrangle_raw_data(testRaw, 4)
-wrangle_clean_data(testWrangled)
+wrangle_clean_data(testWrangled, saveAs = "EL_test")
+
+# Part 2: Analyze
+source("./R/run_fluxxer.R")
+source("./R/calculate_mut_rate.R")
+
+run_fluxxer()
+
