@@ -48,24 +48,24 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
 prep_export <- function(mode = NULL){
   
   # Define top-level path
-  if(!dir.exists("./output")){
-    outputPath <- "./output"
+  outputPath <- "./output"
+  if(!dir.exists(outputPath)){
     dir.create(outputPath, showWarnings = FALSE)
-    warning("Created ./output/ folder for pipeline results.")
+    warning("Created ./output/ folder for pipeline results.", call. = FALSE)
   }
   
   # Create the standard folders
   if(mode == "wrangled"){
     wrangledPath <- paste0(outputPath, "/wrangled")
     if(dir.exists(wrangledPath)){
-      warning("The output folder /wrangled/ already exists! Files may have been overwritten.")
+      stop("The output folder /wrangled/ already exists! Delete or move it and try again.")
     }
     dir.create(wrangledPath, showWarnings = FALSE)
     
   } else if(mode == "analyzed"){
     analyzedPath <- paste0(outputPath, "/analyzed")
     if(dir.exists(analyzedPath)){
-      warning("The output folder /analyzed/ already exists! Files may have been overwritten.")
+      stop("The output folder /analyzed/ already exists! Delete or move it and try again.")
     }
     dir.create(analyzedPath, showWarnings = FALSE)
     
