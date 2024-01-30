@@ -56,14 +56,14 @@ prep_export <- function(mode = NULL){
   
   # Create the standard folders
   if(mode == "wrangled"){
-    wrangledPath <- paste0(outputPath, "/wrangled")
+    wrangledPath <- paste0(outputParent, "/wrangled")
     if(dir.exists(wrangledPath)){
       stop("The output folder /wrangled/ already exists! Delete or move it and try again.")
     }
     dir.create(wrangledPath, showWarnings = FALSE)
     
   } else if(mode == "analyzed"){
-    analyzedPath <- paste0(outputPath, "/analyzed")
+    analyzedPath <- paste0(outputParent, "/analyzed")
     if(dir.exists(analyzedPath)){
       stop("The output folder /analyzed/ already exists! Delete or move it and try again.")
     }
