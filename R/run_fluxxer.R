@@ -60,7 +60,6 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
                          outputPrefix = baseName, 
                          comparisons = TRUE)
     }
-    
   } # end standard mode
  
   
