@@ -1,9 +1,9 @@
 #' Minimally-modified version of calculateMutRate() from fluxxer.R script. 
 #' This version doesn't produce plots, and outputs files to a preset folder structure.
 
-calculateMutRate <- function(dataPath, # change to snakecase
-                             filename = NULL, 
-                             output_prefix = "", 
+calculate_mut_rate <- function(filename = NULL,
+                             outputPath,
+                             outputPrefix = "",
                              comparisons = FALSE){
   
   # require libraries:
@@ -93,7 +93,7 @@ calculateMutRate <- function(dataPath, # change to snakecase
     output_data = rbind(output_data, data.frame(strain = this.strain, num_nonselective_plates = num_nonselective, num_selective_plates = num_selective, selective_fraction = selective_fraction, avg_cells_per_culture = nonselective_cell_counts, mu = mu, CI.95.lower = CI[1], CI.95.higher = CI[2]))
   }
   
-  write_csv(output_data, paste0(dataPath, "/analyzed/", output_prefix,"output.csv"))
+  write_csv(output_data, paste0(outputPath, "/analyzed/", outputPrefix,"output.csv"))
   
   # ##make chart for pretty values
   # plot <- ggplot(output_data, aes(x = strain, y = mu)) +
@@ -200,7 +200,7 @@ calculateMutRate <- function(dataPath, # change to snakecase
     }
   }
   
-  write_csv(comparison_data, paste0(dataPath, "/analyzed/", output_prefix, "comparisons.csv"))
+  write_csv(comparison_data, paste0(outputPath, "/analyzed/", output_prefix, "comparisons.csv"))
   
   
 }
