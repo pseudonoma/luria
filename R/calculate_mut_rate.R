@@ -2,9 +2,9 @@
 #' This version doesn't produce plots, and outputs files to a preset folder structure.
 
 calculate_mut_rate <- function(filename = NULL,
-                             outputPath,
-                             outputPrefix = "",
-                             comparisons = FALSE){
+                               outputPath,
+                               outputPrefix = "",
+                               comparisons = FALSE){
   
   # require libraries:
   suppressMessages(library(rsalvador))
