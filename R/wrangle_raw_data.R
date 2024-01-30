@@ -7,7 +7,7 @@
 #'
 #' @import openxlsx
 #'
-#' @param dataFile The filename of the Excel workbook.
+#' @param dataFile The filename of the Excel workbook template.
 #' @param countPops An integer value indicating how many Count populations were used in each test.
 #' This should be one value for all tests, and should not account for failed Count plates.
 #' @param countFract A named vector for calculating the fraction plated, F, of the Count populations.
@@ -16,26 +16,26 @@
 #' as an integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is
 #' applied to all tests.
 #' The default values are based on the original *A. baylyi* protocol.
-#' @param poolAs A string for filling in the Strain column in the pooled data. 
+#' @param poolAs What the pooled strain should be named. 
 #' Defaults to NULL, in which case the strain is just named "Combined".
 #' @param exclude A vector of sheet names to skip. By default the sheet "Summary" is skipped, but
 #' more can be added.
-#' @param save A pathname for exporting the final CSVs to. Defaults to NULL, in which case the CSVs
-#' are exported to a folder called `wrangled`
+#' @param saveAs A filename to save the wrangled data with. 
+#' Defaults to NULL, in which case the name of the original raw file will be used.
 #'                 
 #' @examples
 #' wrangle_fluxdata(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
 #'                  countPops = 4,
 #'                  poolAs = "AB3", 
 #'                  exclude = c("Summary", "Rep 0", "Rep 13"), 
-#'                  save = "./data/wrangled")
+#'                  saveAs = "RIF_Aug2023")
 #' @return
 #' A tidy CSV with columns `strain`, `plate`, `fraction`, and `CFU`.
 #'
 #' @export
 
 wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
-                             poolAs = NULL, exclude = "Summary", save = NULL){
+                             poolAs = NULL, exclude = "Summary", saveAs = NULL){
   
   # Prep some variables
   allSheets <- openxlsx::getSheetNames(dataFile)
@@ -87,10 +87,10 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   prep_export(mode = "wrangled")
   exportPath <- "./output/wrangled"
   
-  # Construct export filename
+  # Handle export filename
   if(is.null(saveAs)){
-    # extract basename & construct exportName
-    baseName <- sub(".csv", "", basename(dataFile))
+    # extract default basename & construct exportName
+    baseName <- sub(".csv$", "", basename(dataFile))
     exportName <- paste0(exportPath, "/", baseName)
   } else {
     # or construct using <saveAs> value
