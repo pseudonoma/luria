@@ -21,12 +21,23 @@
 # looks for before it continues. 
 # Part 2 must not run independently or out of sequence.
 
-# Part 2 - Analysis
+# Part 2 - Analysis [DONE]
 # run_fluxxer()
-#   calculateMutRate()
+#    calculateMutRate()
 
 # Part 3 - Export
 # get_mutrates() - wrapper with plot/extr/both arg?
 #   extract_mutrate() - pulls all relevant mutation rates and exports as RDATA object
 #   plot_mutrate() - takes non-comparison CSVs and plots
+# Notes:
+# Plotting seems to require refactoring and some by-project shenanigans, so there's a 
+# "core" plotter that generates the plot, and then a bunch of in-place wrangler shit around it.
+# Instead of current implementation of the wrapper calling the plotter, maybe the plotter
+# can call the wrangler beforehand instead?
+
+###
+
+# might be able to extract project names by
+pooledList <- grep("_pooled", dir("./data/analyzed"), value = TRUE)
+sub("_pooled.output.csv$", "", pooledList)
 
