@@ -3,7 +3,7 @@
 
 ###
 
-unlink("./output", recursive = TRUE) # remove /output/ since there's a stop() call
+unlink("./output", recursive = TRUE) # remove /output/ because of that stop() call
 source("./R/helpers.R")
 
 ###

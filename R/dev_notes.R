@@ -37,7 +37,4 @@
 
 ###
 
-# might be able to extract project names by
-pooledList <- grep("_pooled", dir("./data/analyzed"), value = TRUE)
-sub("_pooled.output.csv$", "", pooledList)
 

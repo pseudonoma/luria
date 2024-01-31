@@ -16,6 +16,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
   
   # Create standard output folders regardless of mode
   prep_export(mode = "analyzed")
+  outputPath <- "./output/analyzed"
   
   ##### Single-file mode #####
   if(runMode == "single"){
@@ -27,9 +28,9 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
     
     # run core fluxxer function
     calculateMutRate(filename = file,
-                     outputPath = , 
+                     outputPath, 
                      output_prefix = baseName, 
-                     comparisons = comparisons)
+                     comparisons)
   } # end single mode
   
   ##### Standard pipeline mode #####
@@ -49,14 +50,14 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
     for(file in pooledList){
       baseName <- sub(".csv", "", file)
       calculate_mut_rate(filename = paste0(inputPath, "/", file),
-                         outputPath = "./output/analyzed",
+                         outputPath,
                          outputPrefix = baseName, 
                          comparisons = FALSE)
     }
     for(file in unpooledList){
       baseName <- sub(".csv", "", file)
       calculate_mut_rate(filename = paste0(inputPath, "/", file),
-                         outputPath = "./output/analyzed",
+                         outputPath,
                          outputPrefix = baseName, 
                          comparisons = TRUE)
     }

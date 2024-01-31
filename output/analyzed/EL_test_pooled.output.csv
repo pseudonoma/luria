@@ -1,0 +1,2 @@
+strain,num_nonselective_plates,num_selective_plates,selective_fraction,avg_cells_per_culture,mu,CI.95.lower,CI.95.higher
+Combined,48,158,1,12504166.666666666,3.5091987883785577e-7,3.1195098128446934e-7,3.919955961403979e-7

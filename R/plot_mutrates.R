@@ -5,7 +5,14 @@ plot_mutrates <- function(data, levelOrder){
   # data - the data to plot. probably always combined data
   # levelOrder - the levels to refactor by, including if reps are missing
   
-  plot <- ggplot(data, aes(x = forcats::fct_relevel(strain, levelOrder), 
+  # this might not work
+  if(is.null(levelOrder)){
+    x <- data$strain
+  } else {
+    x <- forcats::fct_relevel(strain, levelOrder)
+  }
+  
+  plot <- ggplot(data, aes(x = x, 
                            y = mu)) +
     geom_point(shape = 16, size = 2, position = position_dodge(width = 0.75)) +
     geom_errorbar(aes(ymin=CI.95.lower, ymax=CI.95.higher), width = 0.15, linewidth = 0.4,

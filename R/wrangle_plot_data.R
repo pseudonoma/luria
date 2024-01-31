@@ -6,41 +6,49 @@
 
 ###
 
-wrangle_plot_data <- function(dataPath, project, repTag){
+wrangle_plot_data <- function(projectName, mode = NULL){
   # ARGS:
-  # data - not sure this is actually used
-  # project - each pair of pooled/unpooled data will have a prefix. Best approach is prolly
-  #             to grep them somehow, since passing them explicitly is kinda weird
-  # repTag - What each replicate is called. This should also prolly be grepped, maybe by looking
-  #          at all the reps and looking for whatever is common to all of them?
+  # projectName - each pair of pooled/unpooled data will have a prefix. Best approach is prolly
+  #               to grep them somehow, since passing them explicitly is kinda weird.
+  # mode - "single" or "standard", to be assigned explicitly by plot_flux(). "Single" will not
+  #        have pooled/unpooled.
   
   ###
   
   # Define dataPath (should be implied? unless this can be called outside of pipeline?)
   dataPath <- "./output/analyzed"
   
-  # import data
-  unpooledData <- read.csv(paste0(dataPath, "/", project, "_unpooled.output.csv"), header = T)
-  pooledData <- read.csv(paste0(dataPath, "/", project, "_pooled.output.csv"), header = T)
+  # Import unpooled data first
+  unpooledData <- read.csv(paste0(dataPath, "/", projectName, "_unpooled.output.csv"), header = T)
   
-  # make combined data from pooled & unpooled data
-  combinedData <- rbind(unpooledData, pooledData)
-  combinedData$strain[which(combinedData$strain == "AB3")] <- "Pooled"
+  # Extract replicate prefix (as long as the format is <prefix><number>)
+  reps <- unpooledData[, "strain"]
+  repPrefix <- unique(gsub("[[:digit:]]*$", "", reps))
+  if(length(repPrefix) > 1){
+    stop("One or more replicates are not named consistently.")
+  }
   
-  # to do: detect repTag automatically
-  
-  
-  # construct factor order for passing to plotter
-  idealOrder <- paste0(repTag, 1:50)
+  # Automatically construct correct factor order for passing to plotter
+  idealOrder <- paste0(repPrefix, 1:1000)
   badOrder <- unpooledData$strain
   goodOrder <- c("Pooled", idealOrder[idealOrder %in% badOrder])
   
-  # Construct export object
-  exportObject <- list(data = combinedData, levels = goodOrder)
+  if(mode == "single"){
+    # Construct export object
+    exportObject <- list("data" = unpooledData, "levels" = goodOrder)
+  } else if(mode == "standard"){
+    # Import the pooled data and combine with unpooled
+    pooledData <- read.csv(paste0(dataPath, "/", projectName, "_pooled.output.csv"), header = T)
+    combinedData <- rbind(unpooledData, pooledData)
+    combinedData$strain[which(combinedData$strain == "AB3")] <- "Pooled"
+    
+    # Construct export object
+    exportObject <- list("data" = combinedData, "levels" = goodOrder)
+  } else if(is.null(mode)){
+    stop("mode is NULL! This should not have happened, please report this bug.")
+  }
   
   
   return(exportObject)
   
 }
-
-

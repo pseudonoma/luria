@@ -76,14 +76,7 @@ get_mutation_rates <- function(dataPath, projNames, repTag, theme = NULL, export
     
     # 1. Plots (actually just poirot "postcard" standard)
     if(export == "plot" | export == "both"){
-      plotName <- paste0(project, "_combined")
-      plotPath <- exportPath
-      ggsave(paste0(plotName, ".pdf"), plot = plot,
-             height = 6, width = 8, units = "in", dpi = 300,
-             limitsize = TRUE, path = exportPath)
-      ggsave(paste0(plotName, ".png"), plot = plot,
-             height = 6, width = 8, units = "in", dpi = 600,
-             limitsize = FALSE, path = exportPath)
+     
     }
     
   }

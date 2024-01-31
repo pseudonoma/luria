@@ -93,7 +93,7 @@ calculate_mut_rate <- function(filename = NULL,
     output_data = rbind(output_data, data.frame(strain = this.strain, num_nonselective_plates = num_nonselective, num_selective_plates = num_selective, selective_fraction = selective_fraction, avg_cells_per_culture = nonselective_cell_counts, mu = mu, CI.95.lower = CI[1], CI.95.higher = CI[2]))
   }
   
-  write_csv(output_data, paste0(outputPath, "/analyzed/", outputPrefix,"output.csv"))
+  write_csv(output_data, paste0(outputPath, "/", outputPrefix, ".output.csv"))
   
   # ##make chart for pretty values
   # plot <- ggplot(output_data, aes(x = strain, y = mu)) +
@@ -200,7 +200,7 @@ calculate_mut_rate <- function(filename = NULL,
     }
   }
   
-  write_csv(comparison_data, paste0(outputPath, "/analyzed/", output_prefix, "comparisons.csv"))
+  write_csv(comparison_data, paste0(outputPath, "/", outputPrefix, ".comparisons.csv"))
   
   
 }
