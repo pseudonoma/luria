@@ -7,11 +7,11 @@
 #     Which means being able to parse repTags or such, and refactor by number. Letters not allowed.
 # In "single", will simply take the file, (possbily) check for validity, and plot.
 # In "standard", will 
-#   (a) check for dirs,
-#   (b) understand "project" codes (essentially outputPrefixes appended by fluxxer call),
-#   (c) pair pooled/unpooled data by these codes,
-#   (d) call the wrangler func to produce (i) combined data and (ii) parse rep order intelligently,
-#   (e) make one plot per project with combined data and correctly factored reps.
+# X  (a) check for dirs
+# X  (b) understand "project" codes (essentially outputPrefixes appended by fluxxer call),
+# X  (c) pair pooled/unpooled data by these codes,
+# X  (d) call the wrangler func to produce (i) combined data and (ii) parse rep order intelligently,
+# X  (e) make one plot per project with combined data and correctly factored reps.
 
 ###
 
@@ -20,46 +20,50 @@ plot_fluxxer <- function(file){
   # file - if specified, changes mode to "single". Then it will plot whatever you give it, but
   #        wrangled so the replicate name factoring is sensible.
   
+  # ISSUES
+  
   ###
   
   # Set mode explicitly once again
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
-  # Test for standard pipeline dirs
-  inputPath <- "./output/wrangled"
-  if(!dir.exists(inputPath)){
-    stop("Folder /wrangled/ not found. In standard mode, the pipeline must be run in order.")
-  }
-  
-  # Prep export folder (mostly for the benefit of "single" mode)
+  # Prep export folder (in std mode it's redundant this time though)
   prep_export(mode = "analyzed")
   outputPath <- "./output/analyzed"
   
+  ##### Single-file mode #####
   if(runMode == "single"){
-    # plot
-    plotData <- wrangle_plot_data(projectName = project, mode = "single") # mode = runMode?
-    plot <- plot_mutrates(plotData[["data"]], plotData[["levels"]])
+    
+    # wrangle & plot
+    plotData <- wrangle_plot_data(file = file)
+    plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
     
     # export
-    export_mut_plot()
+    export_mut_plot(plot, project, exportPath)
     
+  ##### Standard pipeline mode #####  
   } else if(runMode == "standard"){
-    # grep "project names"
+    
+    # Test for standard pipeline dirs
+    inputPath <- "./output/wrangled"
+    if(!dir.exists(inputPath)){
+      stop("Folder /wrangled/ not found. In standard mode, the pipeline must be run in order.")
+    }
+    
+    # grep "project name" file prefixes
     pooledList <- grep("_pooled.output.csv", dir("./output/analyzed"), value = TRUE)
     projectNames <- sub("_pooled.output.csv$", "", pooledList)
     
     # loop and plot over all projects
     for(project in projectList){
-      plotData <- wrangle_plot_data(projectName = project, mode = "standard")
-      plot <- plot_mutrates(plotData[["data"]], plotData[["levels"]])
+      plotData <- wrangle_plot_data(projectName = project)
+      plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
       
       # export
       export_mut_plot(plot, project, exportPath)
+      
     }
-    
-    
   }
-
   
   
 }
