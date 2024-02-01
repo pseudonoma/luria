@@ -31,10 +31,9 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
                      outputPath, 
                      output_prefix = baseName, 
                      comparisons)
-  } # end single mode
-  
+    
   ##### Standard pipeline mode #####
-  if(runMode == "standard"){
+  } else if(runMode == "standard"){
     
     # Test for standard pipeline dirs
     inputPath <- "./output/wrangled"
@@ -61,8 +60,8 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
                          outputPrefix = baseName, 
                          comparisons = TRUE)
     }
-  } # end standard mode
- 
+  }
+  
   
   message("\nDone. Check /analyzed/ for outputs.\n")
   
