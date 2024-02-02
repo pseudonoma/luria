@@ -52,6 +52,8 @@ wrangle_plot_data <- function(file = NULL, projectName = NULL){
    
   } else if(runMode == "standard"){
     
+    # Assign data source folder
+    
     # Load data & refactor reps
     unpooledData <- read.csv(paste0(dataPath, "/", projectName, suffix), header = T)
     goodOrder <- refactor_reps(unpooledData)

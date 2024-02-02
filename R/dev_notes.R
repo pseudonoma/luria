@@ -35,6 +35,10 @@
 # Instead of current implementation of the wrapper calling the plotter, maybe the plotter
 # can call the wrangler beforehand instead?
 
+# Epilogue - Cleanup
+# Decide what the args should be called (esp. e.g. file vs filePath)
+
+
 ###
 
 
