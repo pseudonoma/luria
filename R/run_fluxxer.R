@@ -2,10 +2,10 @@
 # Wrapper function that neatly calls calculateMutRate().
 # Also sets up some standard pathing etc. before calling calculateMutRate().
 
-run_fluxxer <- function(file = NULL, comparisons = TRUE){
+run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
   
   # ARGS:
-  # filePath - the individual file to run on; will trigger "single" mode if anything supplied.
+  # file - the individual file to run on; will trigger "single" mode if anything supplied.
   # comparisons - logical, defaults to TRUE for use in "single" mode cmr() call. In "standard"
   #               mode it does nothing. Not sure if this is actually useful but whatever man.
   
@@ -15,7 +15,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE){
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
   # Create standard output folders regardless of mode
-  prep_export(mode = "analyzed")
+  prep_export(mode = "analyzed", overwrite)
   outputPath <- "./output/analyzed"
   
   ##### Single-file mode #####
