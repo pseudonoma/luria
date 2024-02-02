@@ -35,7 +35,8 @@
 #' @export
 
 wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
-                             poolAs = NULL, exclude = "Summary", saveAs = NULL){
+                             poolAs = NULL, exclude = "Summary", 
+                             saveAs = NULL, overwrite = FALSE){
   
   # Prep some variables
   allSheets <- openxlsx::getSheetNames(dataFile)
@@ -84,13 +85,13 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   } # loop exit #
   
   # Handle exporting using export helper function
-  prep_export(mode = "wrangled")
+  prep_export(mode = "wrangled", overwrite)
   exportPath <- "./output/wrangled"
   
   # Handle export filename
   if(is.null(saveAs)){
     # extract default basename & construct exportName
-    baseName <- sub(".csv$", "", basename(dataFile))
+    baseName <- sub(".xlsx$", "", basename(dataFile))
     exportName <- paste0(exportPath, "/", baseName)
   } else {
     # or construct using <saveAs> value

@@ -2,7 +2,8 @@
 #' Runs on a single CSV supplied via <dataFile>, turns it into standard pooled/unpooled format
 #'   as if it came from wrangle_fluxdata().
 
-wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL, saveAs = NULL){
+wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL, 
+                               saveAs = NULL, overwrite = FALSE){
   # ARGS:
   # dataFile - Should be a single file? If saveAs is option, then files should be passed indiv'lly
   # poolAs - Name to replace strain name for pooling.
@@ -28,7 +29,7 @@ wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL, saveAs =
   }
   
   # Handle export pathing/name overrides
-  prep_export(mode = "wrangled")
+  prep_export(mode = "wrangled", overwrite)
   exportPath <- "./output/wrangled"
   
   # Construct export filename

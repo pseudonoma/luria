@@ -15,10 +15,12 @@
 
 ###
 
-plot_fluxxer <- function(file){
+plot_fluxxer <- function(file = NULL, return.plots = FALSE){
   # ARGS:
   # file - if specified, changes mode to "single". Then it will plot whatever you give it, but
   #        wrangled so the replicate name factoring is sensible.
+  # file should probably be filePath...
+  # return.plots - if TRUE, will return the plot object, or a list of plot objects named by project.
   
   # ISSUES
   
@@ -28,18 +30,24 @@ plot_fluxxer <- function(file){
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
   # Prep export folder (in std mode it's redundant this time though)
-  prep_export(mode = "analyzed")
-  outputPath <- "./output/analyzed"
+  outputPath <- prep_export(mode = "plots")
+  #outputPath <- "./output/analyzed"
   
   ##### Single-file mode #####
   if(runMode == "single"){
     
     # wrangle & plot
-    plotData <- wrangle_plot_data(file = file)
+    plotData <- wrangle_plot_data(file = file, projectName = NULL)
     plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
     
+    # grep "project name" file prefixes
+    prefix <- sub(".output.csv$", "", file)
+    
     # export
-    export_mut_plot(plot, project, exportPath)
+    export_mut_plot(plot, prefix, outputPath)
+    
+    # construct return object (unnecessary, but matches pipeline mode)
+    plots <- plot
     
   ##### Standard pipeline mode #####  
   } else if(runMode == "standard"){
@@ -52,18 +60,28 @@ plot_fluxxer <- function(file){
     
     # grep "project name" file prefixes
     pooledList <- grep("_pooled.output.csv", dir("./output/analyzed"), value = TRUE)
-    projectNames <- sub("_pooled.output.csv$", "", pooledList)
+    projectList <- sub("_pooled.output.csv$", "", pooledList)
     
     # loop and plot over all projects
-    for(project in projectList){
-      plotData <- wrangle_plot_data(projectName = project)
+    plots <- list()
+    for(projectName in projectList){
+      plotData <- wrangle_plot_data(file = NULL, projectName)
       plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
       
       # export
-      export_mut_plot(plot, project, exportPath)
+      export_mut_plot(plot, prefix = projectName, outputPath)
+      
+      # construct return object
+      plots[[project]] <- plot
       
     }
   }
   
+  
+  if(return.plots){
+    return(plots)
+  } else {
+    return(invisible())
+  }
   
 }
