@@ -67,6 +67,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
       stop("The output folder /wrangled/ has files in it! Delete or move the folder and try again.")
     }
     dir.create(wrangledPath, showWarnings = FALSE)
+    outputPath <- wrangledPath
     
   } else if(mode == "analyzed"){
     analyzedPath <- paste0(outputParent, "/analyzed")
@@ -74,9 +75,21 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
       stop("The output folder /analyzed/ has files in it! Delete or move the folder and try again.")
     }
     dir.create(analyzedPath, showWarnings = FALSE)
+    outputPath <- analyzedPath
+    
+  } else if(mode == "plots"){
+    plotsPath <- paste0(outputParent, "/analyzed") # pops it back into the same folder
+    hasPlots <- grepl("^plot_", dir(plotsPath))
+    if(any(hasPlots) & isFALSE(overwrite)){
+      stop("The output folder /analyzed/ has plots in it! Delete or move the folder and try again.")
+    }
+    outputPath <- plotsPath
     
   } else if(is.null(mode)){
     stop("prep_export mode is NULL! This shouldn't have happened, please report this bug.")
   }
+  
+  
+  return
   
 }
