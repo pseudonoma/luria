@@ -98,8 +98,8 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   }
   
   # Write file and report
-  write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
-  write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
+  write.csv(allUnpooled, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
+  write.csv(allPooled, paste0(exportName, "_pooled.csv"), row.names = FALSE)
   
   message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
