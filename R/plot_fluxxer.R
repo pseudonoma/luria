@@ -31,7 +31,6 @@ plot_fluxxer <- function(file = NULL, return.plots = FALSE){
   
   # Prep export folder (in std mode it's redundant this time though)
   outputPath <- prep_export(mode = "plots")
-  #outputPath <- "./output/analyzed"
   
   ##### Single-file mode #####
   if(runMode == "single"){

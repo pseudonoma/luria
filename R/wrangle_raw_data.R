@@ -85,8 +85,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   } # loop exit #
   
   # Handle exporting using export helper function
-  prep_export(mode = "wrangled", overwrite)
-  exportPath <- "./output/wrangled"
+  exportPath <- prep_export(mode = "wrangled", overwrite)
   
   # Handle export filename
   if(is.null(saveAs)){

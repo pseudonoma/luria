@@ -29,8 +29,7 @@ wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL,
   }
   
   # Handle export pathing/name overrides
-  prep_export(mode = "wrangled", overwrite)
-  exportPath <- "./output/wrangled"
+  exportPath <- prep_export(mode = "wrangled", overwrite)
   
   # Construct export filename
   if(is.null(saveAs)){

@@ -15,8 +15,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
   # Create standard output folders regardless of mode
-  prep_export(mode = "analyzed", overwrite)
-  outputPath <- "./output/analyzed"
+  outputPath <- prep_export(mode = "analyzed", overwrite)
   
   ##### Single-file mode #####
   if(runMode == "single"){
