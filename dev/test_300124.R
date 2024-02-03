@@ -13,7 +13,7 @@ source("./R/wrangle_clean_data.R")
 testRaw <- ("./data/testing 2024 01 30/test_raw.xlsx")
 testWrangled <- ("./data/testing 2024 01 30/test_wrangled.csv")
 
-wrangle_raw_data(testRaw, 4, overwrite = TRUE)
+wrangle_raw_data(testRaw, 4, overwrite = TRUE, exclude = c("Summary", "Rep 0", "Rep 13"))
 wrangle_clean_data(testWrangled, saveAs = "EL_test", overwrite = TRUE)
 
 # Part 2: Analyze
@@ -26,7 +26,8 @@ run_fluxxer(overwrite = TRUE)
 source("./R/plot_fluxxer.R")
 source("./R/wrangle_plot_data.R")
 source("./R/refactor_reps.R")
+source("./R/test_logticks.R")
 source("./R/plot_mutrates.R")
 source("./R/export_mut_plot.R")
 
-plot_fluxxer()
+plot_fluxxer(overwrite = TRUE)
