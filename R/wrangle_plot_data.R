@@ -44,16 +44,13 @@ wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL)
    
   } else if(runMode == "standard"){
     
-    # Use unpooled data to get refactored reps
+    # Import data and combine
     unpooledData <- read.csv(paste0(inputPath, "/", projectName, "_unpooled.output.csv"), header = T)
-    
-    
-    # Import the pooled data and combine with unpooled
     pooledData <- read.csv(paste0(inputPath, "/", projectName, "_pooled.output.csv"), header = T)
-    pooledRep <- pooledData$strain
     combinedData <- rbind(pooledData, unpooledData)
     
-    # Refactor
+    # Extract pooled data "rep" and refactor
+    pooledRep <- pooledData$strain
     goodOrder <- refactor_reps(unpooledData, pooledPrefix = pooledRep)
     
     # Handle ggplot2::annotation_logticks() error condition
