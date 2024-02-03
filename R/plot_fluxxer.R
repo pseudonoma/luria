@@ -15,7 +15,7 @@
 
 ###
 
-plot_fluxxer <- function(file = NULL, return.plots = FALSE){
+plot_fluxxer <- function(file = NULL, return.plots = FALSE, overwrite = FALSE){
   # ARGS:
   # file - if specified, changes mode to "single". Then it will plot whatever you give it, but
   #        wrangled so the replicate name factoring is sensible.
@@ -30,7 +30,7 @@ plot_fluxxer <- function(file = NULL, return.plots = FALSE){
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
   
   # Prep export folder (in std mode it's redundant this time though)
-  outputPath <- prep_export(mode = "plots")
+  outputPath <- prep_export(mode = "plots", overwrite)
   
   ##### Single-file mode #####
   if(runMode == "single"){
@@ -40,10 +40,11 @@ plot_fluxxer <- function(file = NULL, return.plots = FALSE){
     plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
     
     # grep "project name" file prefixes
-    prefix <- sub(".output.csv$", "", file)
+    prefix <- sub(".output.csv$", "", basename(file))
     
     # export
     export_mut_plot(plot, prefix, outputPath)
+    message("\nPlot saved to /analyzed/.")
     
     # construct return object (unnecessary, but matches pipeline mode)
     plots <- plot
@@ -52,28 +53,31 @@ plot_fluxxer <- function(file = NULL, return.plots = FALSE){
   } else if(runMode == "standard"){
     
     # Test for standard pipeline dirs
-    inputPath <- "./output/wrangled"
+    inputPath <- "./output/analyzed"
     if(!dir.exists(inputPath)){
       stop("Folder /wrangled/ not found. In standard mode, the pipeline must be run in order.")
     }
     
     # grep "project name" file prefixes
-    pooledList <- grep("_pooled.output.csv", dir("./output/analyzed"), value = TRUE)
+    pooledList <- grep("_pooled.output.csv", dir(inputPath), value = TRUE)
     projectList <- sub("_pooled.output.csv$", "", pooledList)
     
     # loop and plot over all projects
     plots <- list()
     for(projectName in projectList){
-      plotData <- wrangle_plot_data(file = NULL, projectName)
+      plotData <- wrangle_plot_data(file = NULL, projectName, inputPath)
       plot <- plot_mutrates(data = plotData$data, levelOrder = plotData$levels, log = plotData$log)
       
       # export
       export_mut_plot(plot, prefix = projectName, outputPath)
       
       # construct return object
-      plots[[project]] <- plot
+      plots[[projectName]] <- plot
       
     }
+    
+    message("\nPlots saved to /analyzed/.")
+    
   }
   
   
