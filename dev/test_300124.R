@@ -21,6 +21,7 @@ source("./R/run_fluxxer.R")
 source("./R/calculate_mut_rate.R")
 
 run_fluxxer(overwrite = TRUE)
+run_fluxxer(file = testWrangled, comparisons = FALSE) # test individual file
 
 # Part 3: Plot
 source("./R/plot_fluxxer.R")
@@ -30,4 +31,6 @@ source("./R/test_logticks.R")
 source("./R/plot_mutrates.R")
 source("./R/export_mut_plot.R")
 
-plot_fluxxer(overwrite = TRUE)
+plots <- plot_fluxxer(overwrite = TRUE, return.plots = TRUE)
+plot_fluxxer(file = "./output/analyzed/EL_test_pooled.output.csv", overwrite = TRUE)
+
