@@ -85,6 +85,13 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
     }
     outputPath <- plotsPath
     
+  } else if(mode == "mutrates"){
+    mutsPath <- paste0(outputParent, "/analyzed")
+    hasMuts <- grepl("^mutrate_", dir(mutsPath))
+    if(any(hasMuts) & isFALSE(overwrite)){
+      stop("The output folder /analyzed/ has a mutation rate file in it! Delete or move the folder and try again.")
+    }
+    
   } else if(is.null(mode)){
     stop("prep_export mode is NULL! This shouldn't have happened, please report this bug.")
   }
