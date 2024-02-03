@@ -25,11 +25,14 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
       stop("Supplied file appears to be a folder. If running the standard pipeline, do not supply a filename.")
     }
     
+    # extract filename
+    baseName <- sub(".csv", "", basename(file))
+    
     # run core fluxxer function
-    calculateMutRate(filename = file,
-                     outputPath, 
-                     output_prefix = baseName, 
-                     comparisons)
+    calculate_mut_rate(filename = file,
+                       outputPath, 
+                       outputPrefix = baseName, 
+                       comparisons)
     
   ##### Standard pipeline mode #####
   } else if(runMode == "standard"){

@@ -51,12 +51,12 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
   outputParent <- "./output"
   if(!dir.exists(outputParent)){
     dir.create(outputParent, showWarnings = FALSE)
-    warning("Created ./output/ folder for pipeline results.", call. = FALSE)
+    message("Creating folder ./output/ for results.")
   }
   
   # Report overwrite state
   if(overwrite){
-    warning("\'overwrite\' is TRUE - if output folders had contents, they may have been replaced.",
+    warning("Overwriting was active - output folder contents may have been replaced.",
             call. = FALSE)
   }
   
