@@ -133,7 +133,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 #'                    exclude = c(Rep 0", "Rep 13"), 
 #'                    saveAs = "RIF_Aug2023")
 #' @return
-#' Two CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
+#' Two tidy CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
 #'
 #' @export
 

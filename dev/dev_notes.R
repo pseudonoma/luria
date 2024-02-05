@@ -41,4 +41,36 @@
 
 ###
 
+# Some stuff for documentation
+
+#' Prepare a previously-wrangled CSV file for the pipeline.
+#' 
+#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
+#' was not used, this function prepares the CSV file for use with the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
+#' [`run_fluxxer()`], the next function in the pipeline.
+#' 
+#' @import openxlsx
+#' 
+#' @inheritParams wrangle_raw_data
+#' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
+#' @param exclude A character vector of replicates to skip.
+#' 
+#' @examples
+#' wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'                    poolAs = "AB3", 
+#'                    exclude = c(Rep 0", "Rep 13"), 
+#'                    saveAs = "RIF_Aug2023")
+#'                    
+#' @return
+#' Two CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
+#'
+#' @export
+
+
+#' [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
+
 
