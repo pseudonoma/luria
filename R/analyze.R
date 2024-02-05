@@ -4,9 +4,31 @@
 
 ###
 
-# run_fluxxer()
-# Wrapper function that neatly calls calculateMutRate().
-# Also sets up some standard pathing etc. before calling calculateMutRate().
+#' Analyze the data and estimate mutation rates.
+#' 
+#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
+#' was not used, this function prepares the CSV file for use with the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
+#' [`run_fluxxer()`], the next function in the pipeline.
+#' 
+#' @import openxlsx
+#'
+#' @param file
+#' @param comparisons
+#' @param overwrite
+#' 
+#' @examples
+#' run_fluxxer(file = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'             comparisons = "AB3", 
+#'             overwrite = TRUE)
+#'                    
+#' @return
+#' (two CSV outputs per input file; if comparisons = T, then an additional file using _pooled.)
+#'
+#' @export
 
 run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
   
