@@ -1,43 +1,40 @@
-# Contains:
-# wrangle_raw_data [fix doc]
-# wrangle_clean_data [no doc]
-# wrangle_plot_data [no doc, DNE]
-
-###
-
-#' Wrangle and convert fluctuation test data
+#' Convert a fluctuation analysis Excel workbook.
 #'
-#' [***REWRITE THIS***]
-#' This function wrangles raw fluctuation test data, converting it into a format ready for use
-#' with the Barrick Lab's [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
-#' script. `fluxxer.R` in turn calls functions from the rSalvador package.
-#'
+#' Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
+#' [`run_fluxxer()`], the next function in the pipeline.
+#' 
 #' @import openxlsx
 #'
-#' @param dataFile The filename of the Excel workbook template.
+#' @param dataFile The filename of the standard Excel workbook.
 #' @param countPops An integer value indicating how many Count populations were used in each test.
-#' This should be one value for all tests, and should not account for failed Count plates.
-#' @param countFract A named vector for calculating the fraction plated, F, of the Count populations.
-#' Fraction is given in the `fluxxer.R` script as \eqn{F = P\div(CD)}, where P = volume plated,
-#' in uL; C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed
-#' as an integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is
-#' applied to all tests.
-#' The default values are based on the original *A. baylyi* protocol.
+#' This should be one value for all tests, and it should not account for failed Count plates.
+#' @param countFract A named vector for calculating the fraction plated, F, of the Count 
+#' populations. Fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL; 
+#' C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed as an 
+#' integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is applied 
+#' to all tests. The default values are based on the original *A. baylyi* protocol.
 #' @param poolAs What the pooled strain should be named. 
-#' Defaults to NULL, in which case the strain is just named "Combined".
-#' @param exclude A vector of sheet names to skip. By default the sheet "Summary" is skipped, but
-#' more can be added.
-#' @param saveAs A filename to save the wrangled data with. 
-#' Defaults to NULL, in which case the name of the original raw file will be used.
+#' Defaults to `NULL`, in which case the strain is just named *Combined*.
+#' @param exclude A character vector of sheet names (i.e. replicates) to skip. By default the sheet 
+#' "Summary" is skipped, but more can be added.
+#' @param saveAs A filename for saving the wrangled file. 
+#' Defaults to `NULL`, in which case the original filename will be used.
+#' @param overwrite If `TRUE`, the wrangled file will be saved to the output folder whether or not
+#' it replaces an existing file.
+#' Defaults to `FALSE`.
 #'                 
 #' @examples
-#' wrangle_fluxdata(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
+#' wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
 #'                  countPops = 4,
 #'                  poolAs = "AB3", 
 #'                  exclude = c("Summary", "Rep 0", "Rep 13"), 
 #'                  saveAs = "RIF_Aug2023")
 #' @return
-#' A tidy CSV with columns `strain`, `plate`, `fraction`, and `CFU`.
+#' Two tidy CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
 #'
 #' @export
 
@@ -111,23 +108,37 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
   
-} # end wrangle_fluxdata().
+  return(invisible())
+  
+}
 
 
-
-#' Reduced version of auto_intermediates()
-#' Runs on a single CSV supplied via <dataFile>, turns it into standard pooled/unpooled format
-#'   as if it came from wrangle_fluxdata().
+#' Prepare a previously-wrangled CSV file for the pipeline.
+#' 
+#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
+#' was not used, this function prepares the CSV file for use with the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
+#' [`run_fluxxer()`], the next function in the pipeline.
+#' 
+#' @inheritParams wrangle_raw_data
+#' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
+#' @param exclude A character vector of replicates to skip.
+#' 
+#' @examples
+#' wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'                    poolAs = "AB3", 
+#'                    exclude = c(Rep 0", "Rep 13"), 
+#'                    saveAs = "RIF_Aug2023")
+#' @return
+#' Two CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
+#'
+#' @export
 
 wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL, 
                                saveAs = NULL, overwrite = FALSE){
-  # ARGS:
-  # dataFile - Should be a single file? If saveAs is option, then files should be passed indiv'lly
-  # poolAs - Name to replace strain name for pooling.
-  # exclude - Individual strain names to drop; applied before pooling etc.
-  # saveAs - <saveAs>_unpooled.csv
-  
-  ###
   
   # Check the CSV file has correct headers
   headers <- c("strain", "plate", "fraction", "CFU")
@@ -136,7 +147,7 @@ wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL,
     stop("The required columns are missing or incorrectly named. Check your file and try again.")
   }
   
-  # Crudely separate pooled/unpooled data, sans excluded strains
+  # Crudely copy pooled/unpooled data, sans excluded strains
   pooledData <- df[!(df$strain %in% exclude), ]
   unpooledData <- df[!(df$strain %in% exclude), ]
   if(is.null(poolAs)){
@@ -165,29 +176,41 @@ wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL,
   message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
   
+  return(invisible())
+  
 }
 
 
-
-
-# test function that handles in-place wrangling & refactoring, and passes
-# a clean data object for plotting.
-
-# This probably shouldn't have a loop internally, and instead be called in a loop by a wrapper
-# that also calls the plotter in a loop.
-
-###
+#' Wrangle fluxxer outputs for plotting.
+#' 
+#' Internal function called by [`plot_fluxxer()`]. It imports and wrangles analyzed data to prepare
+#' it for plotting.
+#' 
+#' @details
+#' This is a single/standard mode function, taking either an explicit fluxxer .output.csv file, or
+#' automatically retrieving these files from /output/analyzed/. It (a) produces a data object of
+#' combined pooled and unpooled data; (b) calls [`refactor_reps()`] to rearrange replicate names for
+#' plotting; and (c) calls [`test_logticks()`] to detect if the data will cause
+#' [`ggplot2::annotation_logticks`] to throw an error due to error bars not spanning 2 logticks.
+#' 
+#' @param file The filename of the analyzed .output.csv to wrangle. If supplied, the function will
+#' run in single file mode.
+#' @param projectName A project prefix as understood by the pipeline. If supplied, the function will
+#' run in standard pipeline mode.
+#' @param inputPath The path for the pipeline output folder from which files are automatically
+#' retrieved. This must be supplied by [`plot_fluxxer()`] if `projectName` is supplied.
+#' 
+#' @examples
+#' wrangle_plot_data(file = "./data/old_fluc_stuff/FLUCTEST1.output.csv", 
+#'                   projectName = NULL, 
+#'                   inputPath = NULL)
+#'                    
+#' @return A list with: `data`, the plotting data; `levels`, a vector of replicate names in the 
+#' correct order; and `log`, which if `TRUE` will signal [`plot_mutrates()`] to use logticks.
+#'
+#' @keywords internal
 
 wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL){
-  # ARGS:
-  # projectName - each pair of pooled/unpooled data will have a prefix. Best approach is prolly
-  #               to grep them somehow, since passing them explicitly is kinda weird.
-  # mode - "single" or "standard", to be assigned explicitly by plot_flux(). "Single" will not
-  #        have pooled/unpooled.
-  
-  # DEBUG
-  
-  ###
   
   # Detect mode
   if(!is.null(file) & is.null(projectName)){
