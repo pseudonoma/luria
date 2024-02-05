@@ -1,3 +1,11 @@
+# Contains:
+# populate_rows [no doc, DNE]
+# refactor_reps [no doc, DNE]
+# test_logticks [no doc, DNE]
+# prep_export [no doc, DNE]
+# export_mut_plot [no doc, DNE]
+
+
 
 #' Helper function for converting sheet data
 #' 
@@ -38,6 +46,52 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
   return(currentData)
   
 } # end populate_rows(). #
+
+
+# helper function that refactors reps. Called by wrangle_plot_data
+
+refactor_reps <- function(data, pooledPrefix = NULL){
+  
+  # Extract replicate prefix (as long as the format is <prefix><number>)
+  reps <- data$strain[which(data$strain != pooledPrefix)]
+  repPrefix <- unique(gsub("[[:digit:]]*$", "", reps))
+  if(length(repPrefix) > 1){
+    stop("One or more replicates are not named consistently.")
+  }
+  
+  # Automatically construct correct factor order for passing to plotter
+  idealOrder <- paste0(repPrefix, 1:1000)
+  badOrder <- reps
+  goodOrder <- c(pooledPrefix, idealOrder[idealOrder %in% badOrder])
+  
+  
+  return(goodOrder)
+  
+}
+
+
+# helper function for testing annotation_logticks error condition
+
+test_logticks <- function(data){
+  
+  # Note for later: 
+  # This is because annotation_logticks shits itself if max-min is less than one power of 10.
+  # If this doesn't work and it still throws an error, it might be because annotation_logticks()
+  # still doesn't like if max(range) - min(range) >= 1 if they don't actually span two logticks
+  # in the final plot. If that's the case, a more conservative range should be used, i.e.
+  # floor(max(range)) - ceiling(min(range)), which collapses the difference to zero in this case.
+  
+  range <- c(data$CI.95.lower, data$CI.95.higher)
+  if(log(max(range)) - log(min(range)) >= 1){
+    logMode <- TRUE
+  } else {
+    logMode <- FALSE
+  }
+  
+  
+  return(logMode)
+  
+}
 
 
 #' prep_export()
@@ -98,5 +152,22 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
   
   
   return(outputPath)
+  
+}
+
+
+# helper function for exporting mutation rate plots
+
+export_mut_plot <- function(plot, prefix, outputPath){
+  
+  plotName <- paste0("plot_", prefix)
+  exportPath <- outputPath # just for consistency
+  ggsave(paste0(plotName, ".pdf"), plot = plot,
+         height = 6, width = 8, units = "in", dpi = 300,
+         limitsize = TRUE, path = exportPath)
+  ggsave(paste0(plotName, ".png"), plot = plot,
+         height = 6, width = 8, units = "in", dpi = 600,
+         limitsize = FALSE, path = exportPath)
+  
   
 }
