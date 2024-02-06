@@ -5,8 +5,32 @@
 
 ###
 
-# plotting code, v2, 31/01/24
-# supercedes the previous implementation, get_mutation_rates()
+#' Plot mutation rate data.
+#' 
+#' Produce a dot plot of estimated mutation rates, with error bars representing upper and lower
+#' 95% confidence intervals. 
+#' 
+#' @details
+#' Like [`run_fluxxer()`], supplying the `file` argument will cause the function to run in single-
+#' file mode, plotting the data as-is. Otherwise, it will automatically read through the pipeline 
+#' folder `./output/analyzed` and combine pairs of pooled and unpooled data into individual plots. 
+#' Plots are saved as 6 inch by 8 inch images, in both PNG and PDF format, to `./output/analyzed`.
+#'
+#' @inheritParams wrangle_raw_data
+#' @param file The filename of an output file to plot mutation rates from.
+#' @param return.plots Logical. If `TRUE`, the plot is returned. This is useful if you would like to
+#' add further ggplot2 aesthetics, or display the plot in RStudio.
+#' 
+#' @examples
+#' plot <- plot_fluxxer(file = "./data/analyzed/wrangled.output.csv",
+#'                      return.plots = TRUE, 
+#'                      overwrite = TRUE)
+#'                      
+#' @return
+#' If `return.plots` is `TRUE`, either a single `ggplot2` object (in single-file mode), or a list
+#' of `ggplot2` objects, each corresponding to a pair of pooled and unpooled input data.
+#' 
+#' @export
 
 plot_fluxxer <- function(file = NULL, return.plots = FALSE, overwrite = FALSE){
   # ARGS:
