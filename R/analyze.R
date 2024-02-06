@@ -1,43 +1,38 @@
-# Contains:
-# run_fluxxer [no doc]
-# calculate_mut_rates [no doc, DNE]
-
-###
-
 #' Analyze the data and estimate mutation rates.
 #' 
-#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
-#' was not used, this function prepares the CSV file for use with the pipeline.
+#' Estimate mutation rates from wrangled fluctuation analysis data, using an individual file or
+#' as the next step in the pipeline. 
 #' 
 #' @details
-#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
-#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
-#' [`run_fluxxer()`], the next function in the pipeline.
+#' This function calls [`calculate_mut_rate()`] to estimate mutation rates. It can run on a single 
+#' file, or cycle automatically through all files saved to ./output/wrangled/ by the previous step 
+#' in the pipeline. For every input file, a matching output file ending in `.output.csv` will be 
+#' saved to `./output/analyzed`. If `comparisons` is `TRUE`, an additional file will be generated 
+#' ending in `.comparisons.csv`; this file contains pairwise comparisons between all replicates and 
+#' p-values indicating how different the mutation rates are from each other. Supplying the `file` 
+#' argument runs this function in single-file mode. In standard pipeline mode, comparisons are only 
+#' made using unpooled data.
 #' 
-#' @import openxlsx
+#' @import utils
 #'
-#' @param file
-#' @param comparisons
-#' @param overwrite
+#' @inheritParams wrangle_raw_data
+#' @param file The filename of a correctly-formatted CSV file to estimate mutation rates from.
+#' Supplying this will cause the function to run in single-file mode.
+#' @param comparisons Logical value indicating if a comparison file should be generated. If `file`
+#' is also supplied, the function will generate a comparison even if only one strain is available.
 #' 
 #' @examples
 #' run_fluxxer(file = "./data/raws/FLUCTEST 1 2020 09 24.csv",
 #'             comparisons = "AB3", 
 #'             overwrite = TRUE)
-#'                    
+#'             
 #' @return
-#' (two CSV outputs per input file; if comparisons = T, then an additional file using _pooled.)
+#' A CSV file ending in `.output.csv`, containing mutation rate estimates and other statistics. If
+#' `comparisons` is true, an additional CSV containing mutation rate comparisons and p-values.
 #'
 #' @export
 
 run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
-  
-  # ARGS:
-  # file - the individual file to run on; will trigger "single" mode if anything supplied.
-  # comparisons - logical, defaults to TRUE for use in "single" mode cmr() call. In "standard"
-  #               mode it does nothing. Not sure if this is actually useful but whatever man.
-  
-  ###
   
   # Set mode explicitly for my own sanity
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
@@ -49,7 +44,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
   if(runMode == "single"){
     
     # test for file validity
-    if(file_test("-d", file)){
+    if(utils::file_test("-d", file)){
       stop("Supplied file appears to be a folder. If running the standard pipeline, do not supply a filename.")
     }
     
@@ -92,16 +87,42 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
     }
   }
   
-  
   message("\nDone. Check /analyzed/ for outputs.\n")
+  
+  
+  return(invisible())
   
 }
 
 
-
-
-#' Minimally-modified version of calculateMutRate() from fluxxer.R script. 
-#' This version doesn't produce plots, and outputs files to a preset folder structure.
+#' Calculate mutation rates.
+#' 
+#' A version of `calculateMutRate()` from the original [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
+#' script, minimally-modified and converted to an R function.
+#' 
+#' @details
+#' This function is made available for reference only. Do not call this function manually - 
+#' use [`run_fluxxer()`] instead, which supplies the appropriate arguments to this function. This 
+#' version does not produce plots, as it is handled by the pipeline function [`plot_fluxxer()`].
+#' 
+#' @import rSalvador tidyverse
+#'
+#' @param filename A correctly-formatted CSV to estimate mutation rates from.
+#' @param outputPath The directory to save output files to.
+#' @param outputPrefix A prefix to use when saving the output file, which will be named like
+#' `<outputPrefix>.output.csv`
+#' @param comparisons Logical. Indicates if a comparison file should be generated.
+#' 
+#' @examples
+#' run_fluxxer(file = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'             comparisons = "AB3", 
+#'             overwrite = TRUE)
+#'             
+#' @return
+#' A CSV file ending in `.output.csv`, containing mutation rate estimates and other statistics. If
+#' `comparisons` is true, an additional CSV containing mutation rate comparisons and p-values.
+#' 
+#' @export
 
 calculate_mut_rate <- function(filename = NULL,
                                outputPath,
@@ -109,8 +130,8 @@ calculate_mut_rate <- function(filename = NULL,
                                comparisons = FALSE){
   
   # require libraries:
-  suppressMessages(library(rsalvador))
-  suppressMessages(library(tidyverse))
+  # suppressMessages(library(rsalvador))
+  # suppressMessages(library(tidyverse))
   # suppressMessages(library(cowplot))
   # suppressMessages(library(optparse))
   
