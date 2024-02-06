@@ -4,8 +4,8 @@
 #' 
 #' @details
 #' This function produces two CSV files, one with all replicates pooled into one strain, and another 
-#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
-#' [`run_fluxxer()`], the next function in the pipeline.
+#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`, 
+#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
 #' 
 #' @import openxlsx
 #'
@@ -33,8 +33,6 @@
 #'                  poolAs = "AB3", 
 #'                  exclude = c("Summary", "Rep 0", "Rep 13"), 
 #'                  saveAs = "RIF_Aug2023")
-#' @return
-#' Two tidy CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
 #'
 #' @export
 
@@ -120,8 +118,8 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 #' 
 #' @details
 #' This function produces two CSV files, one with all replicates pooled into one strain, and another 
-#' CSV with the replicates kept separate. The output CSV has the standard headers required by 
-#' [`run_fluxxer()`], the next function in the pipeline.
+#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`, 
+#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
 #' 
 #' @inheritParams wrangle_raw_data
 #' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
