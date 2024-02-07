@@ -1,10 +1,3 @@
-# Contains:
-# plot_fluxxer [no doc]
-# plot_mutrates [no doc, DNE]
-# extract_mutrates [no doc]
-
-###
-
 #' Plot mutation rate data.
 #' 
 #' Produce a dot plot of estimated mutation rates, with error bars representing upper and lower
@@ -16,7 +9,7 @@
 #' folder `./output/analyzed` and combine pairs of pooled and unpooled data into individual plots. 
 #' Plots are saved as 6 inch by 8 inch images, in both PNG and PDF format, to `./output/analyzed`.
 #'
-#' @inheritParams wrangle_raw_data
+#' @inheritParams prep_export
 #' @param file The filename of an output file to plot mutation rates from.
 #' @param return.plots Logical. If `TRUE`, the plot is returned. This is useful if you would like to
 #' add further ggplot2 aesthetics, or display the plot in RStudio.
@@ -154,7 +147,7 @@ plot_mutrates <- function(data, levelOrder, log = NULL){
 #' This function does not take single files, as it really only makes sense to take the pooled 
 #' estimate anyway.
 #'
-#' @inheritParams wrangle_raw_data
+#' @inheritParams prep_export
 #' @param method Takes value `"save"`, which exports the data as an RData object; `"return"`, which 
 #' returns the mutation rate as an RData object; or `"both"`, which does both.
 #' 

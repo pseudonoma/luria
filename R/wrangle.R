@@ -9,6 +9,7 @@
 #' 
 #' @import openxlsx
 #'
+#' @inheritParams prep_export
 #' @param dataFile The filename of the standard Excel workbook.
 #' @param countPops An integer value indicating how many Count populations were used in each test.
 #' This should be one value for all tests, and it should not account for failed Count plates.
@@ -23,9 +24,6 @@
 #' "Summary" is skipped, but more can be added.
 #' @param saveAs A filename for saving the wrangled file. 
 #' Defaults to `NULL`, in which case the original filename will be used.
-#' @param overwrite If `TRUE`, the wrangled file will be saved to the output folder whether or not
-#' it replaces an existing file.
-#' Defaults to `FALSE`.
 #'                 
 #' @examples
 #' wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
@@ -122,6 +120,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 #' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
 #' 
 #' @inheritParams wrangle_raw_data
+#' @inheritParams prep_export
 #' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
 #' @param exclude A character vector of replicates to skip.
 #' 
