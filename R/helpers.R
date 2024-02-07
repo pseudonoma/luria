@@ -1,22 +1,22 @@
-# Contains:
-# populate_rows [no doc, DNE]
-# refactor_reps [no doc, DNE]
-# test_logticks [no doc, DNE]
-# prep_export [no doc, DNE]
-# export_mut_plot [no doc, DNE]
-
-
-
-#' Helper function for converting sheet data
+#' Helper function for converting sheet data.
 #' 
-#' This function is internally called by wrangle_fluxdata.
+#' This function is called by [`wrangle_raw_data()`] inside the by-sheet loop. It takes a fluxxer-
+#' formatted dataframe and uses the arguments to populate the rest of the rows, before returning
+#' the dataframe.
+#'
+#' @param currentData The current data to be populated and returned, usually `currentFrame`.
+#' @param currentCounts *Count* data from the current sheet.
+#' @param currentMutants *Selective* data from the current sheet.
+#' @param countFraction *fraction* value for the *Count* populations; generated from `countVars` in 
+#' the wrapper function.
+#' @param countPops The number of *Count* populations used.
+#'                      
+#' @return
+#' A dataframe of identical dimensions and headers as the input.
+#' 
+#' @keywords internal
 
 populate_rows <- function(currentData, currentCounts, currentMutants, countFraction, countPops){
-  # ARGS:
-  # currentData - usually currentFrame; the current df to be populated and returned
-  # currentCounts - Count data from the current sheet
-  # currentMutants - Selective data from the current sheet
-  # countFraction - fraction value for Count pops; generated from countVars in the wrapper
   
   # 1. Populate Count rows (this fraction defined by user)
   countLength <- nrow(currentCounts)
@@ -45,10 +45,25 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
   
   return(currentData)
   
-} # end populate_rows(). #
+}
 
 
-# helper function that refactors reps. Called by wrangle_plot_data
+#' Helper function for reordering replicate names.
+#' 
+#' This function is called by [`wrangle_plot_data()`]. It assumes that each unpooled replicate is 
+#' named in the format `<rep><number>`, where `<rep>` can be any string, with or without spaces, as 
+#' long as it's identical for all replicates. Because it takes the pooled replicate prefix
+#' explicitly via `pooledPrefix`, theoretically any number of nonconforming rep names can be used
+#' as long as they are all explicitly defined in a vector - although there should really only be
+#' one pooled rep.
+#'
+#' @param data The plotting data.
+#' @param pooledPrefix The pooled replicate name.
+#'                      
+#' @return
+#' A string vector of the replicate names in the correct order, with `pooledPrefix` first.
+#' 
+#' @keywords internal
 
 refactor_reps <- function(data, pooledPrefix = NULL){
   
@@ -70,16 +85,28 @@ refactor_reps <- function(data, pooledPrefix = NULL){
 }
 
 
-# helper function for testing annotation_logticks error condition
+#' Helper function to check for the annotation_logticks error.
+#' 
+#' This function is called by [`wrangle_plot_data()`], and exists because because 
+#' `ggplot2::annotation_logticks` shits itself if the upper and lower CI differs by less than one 
+#' power of 10, but the error can't be easily caught once plotting begins. This function simply
+#' checks of the upper and lower CI have a sufficient range, and returns a flag that is ultimately
+#' passed to [`plot_mutrates()`] to enable (or disable) logtics.
+#' 
+#' @details
+#' If this doesn't work and it still throws an error, it might be because `annotation_logticks()`
+#' still doesn't like if max(range) - min(range) >= 1 if they don't actually span two logticks
+#' in the final plot. If that's the case, a more conservative range should be used, i.e.
+#' floor(max(range)) - ceiling(min(range)), which collapses the difference to zero in this case.
+#'
+#' @param data The plotting data.
+#'                      
+#' @return
+#' A logical value indicating if logticks should be used.
+#' 
+#' @keywords internal
 
 test_logticks <- function(data){
-  
-  # Note for later: 
-  # This is because annotation_logticks shits itself if max-min is less than one power of 10.
-  # If this doesn't work and it still throws an error, it might be because annotation_logticks()
-  # still doesn't like if max(range) - min(range) >= 1 if they don't actually span two logticks
-  # in the final plot. If that's the case, a more conservative range should be used, i.e.
-  # floor(max(range)) - ceiling(min(range)), which collapses the difference to zero in this case.
   
   range <- c(data$CI.95.lower, data$CI.95.higher)
   if(log(max(range)) - log(min(range)) >= 1){
@@ -94,10 +121,27 @@ test_logticks <- function(data){
 }
 
 
-#' prep_export()
+#' Helper function for setting up and checking folder structure and pathing.
 #' 
-#' Helper function that handles folder structure and pathing checks. Exporting is still handled by
-#' the calling function, this one just sets up the folders.
+#' This function is called by all frontend function that produce file outputs, namely
+#' [`wrangle_raw_data()`], [`wrangle_clean_data()`], [`run_fluxxer()`], and [`plot_fluxxer()`].
+#' It always attempts to create the top-level output folder `./output/` whenever it's called, 
+#' and enforces output folder structure by (a) checking if the output subfolder exists and if
+#' its contents can be overwritten, and (b) returning the output path for use by the calling 
+#' function so it only has to be defined once. `overwrite` is determined by the user in the 
+#' frontend functions; if `FALSE`, files cannot be written to the output folder if it contains 
+#' valid files.
+#'
+#' @param mode Defined by the calling function to determine what output folder is appropriate and
+#' how to handle it. Takes values `"wrangled"`, `"analyzed"`, `"plots"`, or `"mutrates"`.
+#' @param overwrite If `TRUE`, output file(s) will be saved to the appropriate folder whether or not
+#' existing file(s) are replaced.
+#' Defaults to `FALSE`.
+#'                      
+#' @return
+#' A string indicating the output folder path.
+#' 
+#' @keywords internal
 
 prep_export <- function(mode = NULL, overwrite = FALSE){
   
@@ -156,7 +200,17 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
 }
 
 
-# helper function for exporting mutation rate plots
+#' Helper function saving mutation rate plots.
+#' 
+#' This function is called by [`plot_fluxxer()`]. All it does is save a plot in PNG and PDF 
+#' format in "postcard" dimensions (6" x 8") to the specified output folder.
+#'
+#' @param plot The ggplot object to save.
+#' @param prefix The name of the file, which should be project name if handled correctly by the 
+#' calling function.
+#' @param outputPath The path of the output folder. Also handled by the calling function.
+#' 
+#' @keywords internal
 
 export_mut_plot <- function(plot, prefix, outputPath){
   
@@ -168,6 +222,5 @@ export_mut_plot <- function(plot, prefix, outputPath){
   ggsave(paste0(plotName, ".png"), plot = plot,
          height = 6, width = 8, units = "in", dpi = 600,
          limitsize = FALSE, path = exportPath)
-  
-  
+
 }
