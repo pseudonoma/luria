@@ -1,47 +1,49 @@
-#' Wrangle and convert fluctuation test data
+#' Convert a fluctuation analysis Excel workbook.
 #'
-#' This function wrangles raw fluctuation test data, converting it into a format ready for use
-#' with the Barrick Lab's [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
-#' script. `fluxxer.R` in turn calls functions from the rSalvador package.
-#'
+#' Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`, 
+#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
+#' 
 #' @import openxlsx
 #'
-#' @param dataFile The filename of the Excel workbook.
+#' @inheritParams prep_export
+#' @param dataFile The filename of the standard Excel workbook.
 #' @param countPops An integer value indicating how many Count populations were used in each test.
-#' This should be one value for all tests, and should not account for failed Count plates.
-#' @param countFract A named vector for calculating the fraction plated, F, of the Count populations.
-#' Fraction is given in the `fluxxer.R` script as \eqn{F = P\div(CD)}, where P = volume plated,
-#' in uL; C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed
-#' as an integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is
-#' applied to all tests.
-#' The default values are based on the original *A. baylyi* protocol.
-#' @param poolAs A string for filling in the Strain column in the pooled data. 
-#' Defaults to NULL, in which case the strain is just named "Combined".
-#' @param exclude A vector of sheet names to skip. By default the sheet "Summary" is skipped, but
-#' more can be added.
-#' @param save A pathname for exporting the final CSVs to. Defaults to NULL, in which case the CSVs
-#' are exported to a folder called `analyzed`
+#' This should be one value for all tests, and it should not account for failed Count plates.
+#' @param countFract A named vector for calculating the fraction plated, F, of the Count 
+#' populations. Fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL; 
+#' C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed as an 
+#' integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is applied 
+#' to all tests. The default values are based on the original *A. baylyi* protocol.
+#' @param poolAs What the pooled strain should be named. 
+#' Defaults to `NULL`, in which case the strain is just named *Combined*.
+#' @param exclude A character vector of sheet names (i.e. replicates) to skip. By default the sheet 
+#' "Summary" is skipped, but more can be added.
+#' @param saveAs A filename for saving the wrangled file. 
+#' Defaults to `NULL`, in which case the original filename will be used.
 #'                 
 #' @examples
-#' wrangle_fluxdata(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
+#' wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
 #'                  countPops = 4,
 #'                  poolAs = "AB3", 
 #'                  exclude = c("Summary", "Rep 0", "Rep 13"), 
-#'                  save = "./data/wrangled")
-#' @return
-#' A tidy CSV with columns `strain`, `plate`, `fraction`, and `CFU`.
+#'                  saveAs = "RIF_Aug2023")
 #'
 #' @export
 
-wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
-                             poolAs = NULL, exclude = "Summary", save = NULL){
+wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
+                             poolAs = NULL, exclude = "Summary", 
+                             saveAs = NULL, overwrite = FALSE){
   
   # Prep some variables
   allSheets <- openxlsx::getSheetNames(dataFile)
   sheetNames <- allSheets[!allSheets %in% exclude] # only unexcluded sheet names
   countFraction <- countFract["P"]/(countFract["C"] * countFract["D"])
   if(is.na(countFraction)){
-    stop("Couldn't calculate Count plating fraction. Check that countVars is a named vector!")
+    stop("Couldn't calculate Count plating fraction; check that countFract is a named vector.")
   }
   
   # Prep the two master dfs
@@ -82,69 +84,176 @@ wrangle_fluxdata <- function(dataFile, countPops, countFract = c(P = 200, C = 20
     
   } # loop exit #
   
-  # Handle export pathing
-  if(is.null(save)){
-    message("\nNo output folder defined, creating default folder /analyzed/")
-    if(dir.exists("./analyzed")){
-      warning("The specified output folder already exists! Files may have been overwritten.")
-    }
-    dir.create("./analyzed", showWarnings = FALSE)
-    outputPath <- "./analyzed"
+  # Handle exporting using export helper function
+  exportPath <- prep_export(mode = "wrangled", overwrite)
+  
+  # Handle export filename
+  if(is.null(saveAs)){
+    # extract default basename & construct exportName
+    baseName <- sub(".xlsx$", "", basename(dataFile))
+    exportName <- paste0(exportPath, "/", baseName)
   } else {
-    if(dir.exists(save)){
-      warning("The specified output folder already exists! Files may have been overwritten.")
-    }
-    dir.create(save, showWarnings = FALSE)
-    outputPath <- save
+    # or construct using <saveAs> value
+    exportName <- paste0(exportPath, "/", saveAs)
   }
   
-  # Export and report
-  fileName <- sub(".xlsx", "", basename(dataFile))
-  write.csv(allUnpooled, paste0(outputPath, "/", fileName, "_unpooled.csv"), row.names = FALSE)
-  write.csv(allPooled, paste0(outputPath, "/", fileName, "_pooled.csv"), row.names = FALSE)
+  # Write file and report
+  write.csv(allUnpooled, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
+  write.csv(allPooled, paste0(exportName, "_pooled.csv"), row.names = FALSE)
   
-  message("\nCompleted. Check the output folder for the wrangled .csv files.\n")
+  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
   
-} # end wrangle_fluxdata().
+  return(invisible())
+  
+}
 
 
-#' Helper function for converting sheet data
+#' Prepare a previously-wrangled CSV file for the pipeline.
 #' 
-#' This function is internally called by wrangle_fluxdata.
+#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
+#' was not used, this function prepares the CSV file for use with the pipeline.
+#' 
+#' @details
+#' This function produces two CSV files, one with all replicates pooled into one strain, and another 
+#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`, 
+#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
+#' 
+#' @inheritParams wrangle_raw_data
+#' @inheritParams prep_export
+#' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
+#' @param exclude A character vector of replicates to skip.
+#' 
+#' @examples
+#' wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'                    poolAs = "AB3", 
+#'                    exclude = c(Rep 0", "Rep 13"), 
+#'                    saveAs = "RIF_Aug2023")
+#' @return
+#' Two tidy CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
+#'
+#' @export
 
-populate_rows <- function(currentData, currentCounts, currentMutants, countFraction, countPops){
-  # ARGS:
-  # currentData - usually currentFrame; the current df to be populated and returned
-  # currentCounts - Count data from the current sheet
-  # currentMutants - Selective data from the current sheet
-  # countFraction - fraction value for Count pops; generated from countVars in the wrapper
+wrangle_clean_data <- function(dataFile, poolAs = NULL, exclude = NULL, 
+                               saveAs = NULL, overwrite = FALSE){
   
-  # 1. Populate Count rows (this fraction defined by user)
-  countLength <- nrow(currentCounts)
-  currentData$plate[1:countLength] <- "Count"
-  currentData$fraction[1:countLength] <- countFraction
-  currentData$CFU[1:countLength] <- currentCounts$mean
-  
-  # 2. Populate Selective rows (this fraction isn't optional; by the protocol it's 1)
-  mutantLength <- nrow(currentMutants)
-  if(mutantLength == 0){ # even if there's no mutants, you need one more row to fill 0 into
-    mutantLength <- 1
-  }
-  currentData$plate[(countLength+1):(countLength+mutantLength)] <- "Selective"
-  currentData$fraction[(countLength+1):(countLength+mutantLength)] <- 200/(200*1) # fract = 1
-  if(nrow(currentMutants) == 0){
-    currentData$CFU[countLength+1] <- 0 #
-  } else{
-    currentData$CFU[(countLength+1):(countLength+mutantLength)] <- currentMutants$Count
+  # Check the CSV file has correct headers
+  headers <- c("strain", "plate", "fraction", "CFU")
+  df <- read.csv(dataFile)
+  if(!all(headers %in% names(df))){
+    stop("The required columns are missing or incorrectly named. Check your file and try again.")
   }
   
-  # 3. Fill the rest of the selective rows with 0 CFUs
-  currentData$plate[(countLength + mutantLength + 1):(countLength + (60 - countPops))] <- "Selective"
-  currentData$fraction[(countLength + mutantLength + 1):(countLength + (60 - countPops))] <- (200*1)/200
-  currentData$CFU[(countLength + mutantLength + 1):(countLength + (60 - countPops))] <- 0
+  # Crudely copy pooled/unpooled data, sans excluded strains
+  pooledData <- df[!(df$strain %in% exclude), ]
+  unpooledData <- df[!(df$strain %in% exclude), ]
+  if(is.null(poolAs)){
+    pooledData$strain <- "Combined"
+  } else {
+    pooledData$strain <- poolAs
+  }
+  
+  # Handle export pathing/name overrides
+  exportPath <- prep_export(mode = "wrangled", overwrite)
+  
+  # Construct export filename
+  if(is.null(saveAs)){
+    # extract basename & construct exportName
+    baseName <- sub(".csv", "", basename(dataFile))
+    exportName <- paste0(exportPath, "/", baseName)
+  } else {
+    # or construct using <saveAs> value
+    exportName <- paste0(exportPath, "/", saveAs)
+  }
+  
+  # Write file and report
+  write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
+  write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
+  
+  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
   
   
-  return(currentData)
+  return(invisible())
   
-} # end populate_rows(). #
+}
+
+
+#' Wrangle fluxxer outputs for plotting.
+#' 
+#' Internal function called by [`plot_fluxxer()`]. It imports and wrangles analyzed data to prepare
+#' it for plotting.
+#' 
+#' @details
+#' This is a single/standard mode function, taking either an explicit fluxxer .output.csv file, or
+#' automatically retrieving these files from /output/analyzed/. It (a) produces a data object of
+#' combined pooled and unpooled data; (b) calls [`refactor_reps()`] to rearrange replicate names for
+#' plotting; and (c) calls [`test_logticks()`] to detect if the data will cause
+#' [`ggplot2::annotation_logticks`] to throw an error due to error bars not spanning 2 logticks.
+#' 
+#' @param file The filename of the analyzed .output.csv to wrangle. If supplied, the function will
+#' run in single file mode.
+#' @param projectName A project prefix as understood by the pipeline. If supplied, the function will
+#' run in standard pipeline mode.
+#' @param inputPath The path for the pipeline output folder from which files are automatically
+#' retrieved. This must be supplied by [`plot_fluxxer()`] if `projectName` is supplied.
+#' 
+#' @examples
+#' wrangle_plot_data(file = "./data/old_fluc_stuff/FLUCTEST1.output.csv", 
+#'                   projectName = NULL, 
+#'                   inputPath = NULL)
+#'                    
+#' @return A list with: `data`, the plotting data; `levels`, a vector of replicate names in the 
+#' correct order; and `log`, which if `TRUE` will signal [`plot_mutrates()`] to use logticks.
+#'
+#' @keywords internal
+
+wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL){
+  
+  # Detect mode
+  if(!is.null(file) & is.null(projectName)){
+    runMode <- "single"
+  } else if(is.null(file) & !is.null(projectName)){
+    runMode <- "standard"
+    if(is.null(inputPath)){
+      stop(paste0("projectName supplied without inputPath. Please report this bug."))
+    }
+  } else {
+    stop("That's odd, file XOR project should be NULL. Please report this bug.")
+  }
+  
+  # Begin wrangle
+  if(runMode == "single"){
+    
+    # Load data & refactor reps
+    singleData <- read.csv(file, header = T)
+    goodOrder <- refactor_reps(singleData)
+    
+    # Handle ggplot2::annotation_logticks() error condition
+    logMode <- test_logticks(singleData)
+    
+    # Construct export object
+    exportObject <- list("data" = singleData, "levels" = goodOrder, "log" = logMode)
+    
+  } else if(runMode == "standard"){
+    
+    # Import data and combine
+    unpooledData <- read.csv(paste0(inputPath, "/", projectName, "_unpooled.output.csv"), header = T)
+    pooledData <- read.csv(paste0(inputPath, "/", projectName, "_pooled.output.csv"), header = T)
+    combinedData <- rbind(pooledData, unpooledData)
+    
+    # Extract pooled data "rep" and refactor
+    pooledRep <- pooledData$strain
+    goodOrder <- refactor_reps(unpooledData, pooledPrefix = pooledRep)
+    
+    # Handle ggplot2::annotation_logticks() error condition
+    logMode <- test_logticks(combinedData)
+    
+    # Construct export object
+    exportObject <- list("data" = combinedData, "levels" = goodOrder, "log" = logMode)
+    
+  }
+  
+  
+  return(exportObject)
+  
+}

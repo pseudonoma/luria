@@ -44,25 +44,13 @@ get_mutation_rates <- function(dataPath, projNames, repTag, theme = NULL, export
     
     # optional: overlay
     if(!is.null(theme)){
-      plot <- tryCatch(
-        overlay_dotplot_borderless(plotObject = plot, theme = theme, yLabel = "Mutation rate"),
-        error = function(e){
-          message("Aesthetic overlays are part of package \"poirot\" and not currently available :(")
-        }
-      )
+      plot <- overlay_means_classic(plotObject = plot, theme = theme, yLabel = "Mutation rate")
     }
     
     # Handle export (plots)
     if(export == "plot" | export == "both"){
       plotName <- paste0(project, "_combined")
-      tryCatch(
-        auto_export(plot, plotName, dimensions = "postcard"),
-        error = function(e){
-          message("Plot exporting is part of package \"poirot\" and not currently available :(")
-        }
-        
-      )
-      
+      auto_export(plot, plotName, dimensions = "postcard")
     }
     
   }
@@ -79,29 +67,13 @@ get_mutation_rates <- function(dataPath, projNames, repTag, theme = NULL, export
   
   return(invisible())
   
-} # end get_mutation_rates(). #
-
-
-# core plotting function
-
-plot_mutrates <- function(data, levelOrder){
-  # ARGS:
-  # data - the data to plot. probably always combined data
-  # levelOrder - the levels to refactor by, including if reps are missing
-  
-  plot <- ggplot(data, aes(x = forcats::fct_relevel(strain, levelOrder), 
-                           y = mu)) +
-    geom_point(shape = 16, size = 2, position = position_dodge(width = 0.75)) +
-    geom_errorbar(aes(ymin=CI.95.lower, ymax=CI.95.higher), width = 0.15, linewidth = 0.4,
-                  position = position_dodge(width = 0.75)) +
-    scale_y_log10() +
-    xlab(NULL) +
-    ylab("Mutation rate") +
-    annotation_logticks(sides = "l") +
-    theme(axis.text.x = element_text(angle = 90, vjust = 0.5))
-  
-  
-  return(plot)
-  
 }
+
+
+
+
+
+
+
+
 
