@@ -11,7 +11,7 @@
 #' 95% confidence intervals. 
 #' 
 #' @details
-#' Like [`run_fluxxer()`], supplying the `file` argument will cause the function to run in single-
+#' Like [`run_fluxxer()`], supplying the `file` argument will cause this function to run in single-
 #' file mode, plotting the data as-is. Otherwise, it will automatically read through the pipeline 
 #' folder `./output/analyzed` and combine pairs of pooled and unpooled data into individual plots. 
 #' Plots are saved as 6 inch by 8 inch images, in both PNG and PDF format, to `./output/analyzed`.
@@ -33,15 +33,6 @@
 #' @export
 
 plot_fluxxer <- function(file = NULL, return.plots = FALSE, overwrite = FALSE){
-  # ARGS:
-  # file - if specified, changes mode to "single". Then it will plot whatever you give it, but
-  #        wrangled so the replicate name factoring is sensible.
-  # file should probably be filePath...
-  # return.plots - if TRUE, will return the plot object, or a list of plot objects named by project.
-  
-  # ISSUES
-  
-  ###
   
   # Set mode explicitly once again
   runMode <- ifelse(is.null(file), yes = "standard", no = "single")
@@ -107,22 +98,32 @@ plot_fluxxer <- function(file = NULL, return.plots = FALSE, overwrite = FALSE){
 }
 
 
-###
-
-# core plotting function
+#' The core plotting function.
+#' 
+#' Produce a ggplot object with or without a log-scale y-axis.
+#' 
+#' @details
+#' This function does nothing but produce the *luria* plot. Factoring the replicates is done by 
+#' [`refactor_reps()`], and switching the log y-axis is done through a logical value supplied by 
+#' [`test_logticks()`]. [`plot_fluxxer()`] calls this function every time a plot is generated.
+#' 
+#' @import ggplot2 forcats
+#'
+#' @param data A wrangled data object to use for plotting.
+#' @param levelOrder A string vector defining the order that replicates will appear on the x-axis.
+#' @param log A logical value indicating if the data will trigger the [`annotation_logticks`] error.
+#' Defaults to `NULL`; logticks are applied if `TRUE`.
+#'                      
+#' @return
+#' A ggplot2 object.
+#' 
+#' @keywords internal
 
 plot_mutrates <- function(data, levelOrder, log = NULL){
-  # ARGS:
-  # data - the data to plot. probably always combined data
-  # levelOrder - the levels to refactor by, including if reps are missing
-  
-  # DEBUG
-  # data <- plotData$data
-  # levelOrder <- plotData$levels
   
   # make most of the plot
-  plot <- ggplot(data, aes(x = forcats::fct_relevel(strain, levelOrder), 
-                           y = mu)) +
+  plot <- ggplot2::ggplot(data, aes(x = forcats::fct_relevel(strain, levelOrder), 
+                                    y = mu)) +
     geom_point(shape = 16, size = 2, position = position_dodge(width = 0.75)) +
     geom_errorbar(aes(ymin=CI.95.lower, ymax=CI.95.higher), width = 0.10, linewidth = 0.4,
                   position = position_dodge(width = 0.75)) +
@@ -142,11 +143,28 @@ plot_mutrates <- function(data, levelOrder, log = NULL){
 }
 
 
-###
-
-# test function to extract and export mutrates as an RData object
-# this was initially used for pkg tapedeck, but is supposed to make mutrate extraction
-# more consistent instead of leaving it to copy-pasting.
+#' Extract mutation rates in a reproducible manner.
+#' 
+#' Automatically get mutation rates from output data and save it as an RData object.
+#' 
+#' @details
+#' This function was originally designed to quickly export pooled mutation rate estimates for
+#' simulation work, making it easier to track estimate versions and removing the need for copy + 
+#' pasting. It is likely only useful if you have multiple projects to extract numbers from. 
+#' This function does not take single files, as it really only makes sense to take the pooled 
+#' estimate anyway.
+#'
+#' @inheritParams wrangle_raw_data
+#' @param method Takes value `"save"`, which exports the data as an RData object; `"return"`, which 
+#' returns the mutation rate as an RData object; or `"both"`, which does both.
+#' 
+#' @example
+#' mutrates <- extract_mutrates(method = "both")
+#'                      
+#' @return
+#' If `method` is `"return"` or `"both"`, a numeric vector with elements named by project.
+#' 
+#' @keywords internal
 
 extract_mutrates <- function(method = "save", overwrite = FALSE){
   
