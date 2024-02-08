@@ -27,4 +27,8 @@ pasting. It is likely only useful if you have multiple projects to extract numbe
 This function does not take single files, as it really only makes sense to take the pooled
 estimate anyway.
 }
+\examples{
+mutrates <- extract_mutrates(method = "both")
+
+}
 \keyword{internal}

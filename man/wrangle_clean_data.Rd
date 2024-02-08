@@ -39,3 +39,9 @@ This function produces two CSV files, one with all replicates pooled into one st
 CSV with the replicates kept separate. The output CSV has the columns \code{strain}, \code{plate},
 \code{fraction}, and \code{CFU}, which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
 }
+\examples{
+wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+                   poolAs = "AB3",
+                   exclude = c("Rep 0", "Rep 13"),
+                   saveAs = "RIF_Aug2023")
+}

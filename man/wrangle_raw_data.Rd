@@ -50,8 +50,8 @@ CSV with the replicates kept separate. The output CSV has the columns \code{stra
 \examples{
 wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
                  countPops = 4,
-                 poolAs = "AB3", 
-                 exclude = c("Summary", "Rep 0", "Rep 13"), 
+                 poolAs = "AB3",
+                 exclude = c("Summary", "Rep 0", "Rep 13"),
                  saveAs = "RIF_Aug2023")
 
 }

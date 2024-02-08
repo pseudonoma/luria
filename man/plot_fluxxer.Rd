@@ -32,7 +32,7 @@ Plots are saved as 6 inch by 8 inch images, in both PNG and PDF format, to \code
 }
 \examples{
 plot <- plot_fluxxer(file = "./data/analyzed/wrangled.output.csv",
-                     return.plots = TRUE, 
+                     return.plots = TRUE,
                      overwrite = TRUE)
-                     
+
 }

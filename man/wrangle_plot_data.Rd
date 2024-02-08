@@ -32,9 +32,9 @@ plotting; and (c) calls \code{\link[=test_logticks]{test_logticks()}} to detect 
 \code{\link[ggplot2:annotation_logticks]{ggplot2::annotation_logticks}} to throw an error due to error bars not spanning 2 logticks.
 }
 \examples{
-wrangle_plot_data(file = "./data/old_fluc_stuff/FLUCTEST1.output.csv", 
-                  projectName = NULL, 
+wrangle_plot_data(file = "./data/old_fluc_stuff/FLUCTEST1.output.csv",
+                  projectName = NULL,
                   inputPath = NULL)
-                   
+
 }
 \keyword{internal}
