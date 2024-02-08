@@ -1,3 +1,6 @@
+# luria output files
+output/
+
 # History files
 .Rhistory
 .Rapp.history
