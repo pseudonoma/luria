@@ -60,7 +60,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
     currentMutants <- openxlsx::read.xlsx(dataFile, sheet = sheet,
                                           rows = 2:(nrow(openxlsx::read.xlsx(dataFile, sheet = sheet)) + 1),
                                           cols = 7:8)
-    currentCounts$mean <- rowMeans(currentCounts) # compute count plate means
+    currentCounts$mean <- rowMeans(currentCounts, na.rm = TRUE) # compute count plate means
 
     # prep the two streams of current dfs
     if(is.null(poolAs)){
