@@ -101,7 +101,7 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
 #' appropriate arguments. This version does not produce plots, as it is handled by the pipeline 
 #' function [`plot_fluxxer()`].
 #' 
-#' @import rSalvador tidyverse
+#' @import rsalvador dplyr tibble readr
 #'
 #' @param filename A correctly-formatted CSV to estimate mutation rates from.
 #' @param outputPath The directory to save output files to.
@@ -133,12 +133,12 @@ calculate_mut_rate <- function(filename = NULL,
   #read in file specified. Must be in same directory
   #for testing
   #data <- read_csv("example_dataset_2.csv") 
-  data = read_csv(filename)  
+  data = readr::read_csv(filename)  
   
   #do some checks of the input files to expand abbreviations
   data$plate = tolower(data$plate)
-  data = mutate(data, plate = ifelse( (plate == "n") | (plate == "ns") | (plate == "count"), "nonselective", plate))
-  data = mutate(data, plate = ifelse(plate == "s", "selective", plate))
+  data = dplyr::mutate(data, plate = ifelse( (plate == "n") | (plate == "ns") | (plate == "count"), "nonselective", plate))
+  data = dplyr::mutate(data, plate = ifelse(plate == "s", "selective", plate))
   
   data$strain = as.factor(data$strain)
   data$plate = as.factor(data$plate)
@@ -150,7 +150,7 @@ calculate_mut_rate <- function(filename = NULL,
   cat("Found", num_strains, "strains:\n")
   cat(strains, sep='\n')
   
-  output_data <- tibble()
+  output_data <- tibble::tibble()
   
   #cycle through each column to calculate mutatation rate and confidence  
   for(this.strain in strains) {
@@ -159,8 +159,8 @@ calculate_mut_rate <- function(filename = NULL,
     this.strain.data = data %>% filter(strain==this.strain)
     
     #extract selective values
-    selective.rows = this.strain.data %>% filter(plate=="selective")
-    nonselective.rows = this.strain.data %>% filter(plate=="nonselective")
+    selective.rows = this.strain.data %>% dplyr::filter(plate=="selective")
+    nonselective.rows = this.strain.data %>% dplyr::filter(plate=="nonselective")
     num_selective = nrow(selective.rows)
     num_nonselective = nrow(nonselective.rows)
     
@@ -176,7 +176,7 @@ calculate_mut_rate <- function(filename = NULL,
     cat("Estimated cells per culture:", nonselective_cell_counts, "(", nrow(nonselective.rows), "nonselective plates )\n")
     
     #all selective plates must have the same fraction
-    selective_fraction_list = selective.rows %>% count(fraction)
+    selective_fraction_list = selective.rows %>% dplyr::count(fraction)
     if (nrow(selective_fraction_list) > 1) {
       cat("***ERROR! Multiple fractions found for selective plates. Skipping strain.\n")
       next
@@ -185,25 +185,32 @@ calculate_mut_rate <- function(filename = NULL,
     cat("Fraction or efficiency of selective cultures plated (e):", selective_fraction, "\n")
     
     if (selective_fraction == 1) {
-      m = newton.LD(selective.rows$CFU)
+      m = rsalvador::newton.LD(selective.rows$CFU)
     } else {
-      m = newton.LD.plating(selective.rows$CFU, e=selective_fraction)
+      m = rsalvador::newton.LD.plating(selective.rows$CFU, e=selective_fraction)
     }
     
     mu = m / nonselective_cell_counts
     cat("Maximum likelihood mutation rate (mu):", mu, "\n")
     
     if (selective_fraction == 1) {
-      CI = confint.LD(selective.rows$CFU, alpha=0.05)/nonselective_cell_counts
+      CI = rsalvador::confint.LD(selective.rows$CFU, alpha=0.05)/nonselective_cell_counts
     } else {
-      CI = confint.LD.plating(selective.rows$CFU, alpha=0.05, e=selective_fraction)/nonselective_cell_counts
+      CI = rsalvador::confint.LD.plating(selective.rows$CFU, alpha=0.05, e=selective_fraction)/nonselective_cell_counts
     }
     cat("         95% confidence interval (mu): [", CI[1], ",", CI[2] , "]\n")
     
-    output_data = rbind(output_data, data.frame(strain = this.strain, num_nonselective_plates = num_nonselective, num_selective_plates = num_selective, selective_fraction = selective_fraction, avg_cells_per_culture = nonselective_cell_counts, mu = mu, CI.95.lower = CI[1], CI.95.higher = CI[2]))
+    output_data = rbind(output_data, data.frame(strain = this.strain, 
+                                                num_nonselective_plates = num_nonselective, 
+                                                num_selective_plates = num_selective, 
+                                                selective_fraction = selective_fraction, 
+                                                avg_cells_per_culture = nonselective_cell_counts, 
+                                                mu = mu, 
+                                                CI.95.lower = CI[1], 
+                                                CI.95.higher = CI[2]))
   }
   
-  write_csv(output_data, paste0(outputPath, "/", outputPrefix, ".output.csv"))
+  readr::write_csv(output_data, paste0(outputPath, "/", outputPrefix, ".output.csv"))
   
   # ##make chart for pretty values
   # plot <- ggplot(output_data, aes(x = strain, y = mu)) +
@@ -242,14 +249,14 @@ calculate_mut_rate <- function(filename = NULL,
       this.strain.i = strains[i]
       this.strain.j = strains[j]
       
-      this.strain.data.i = data %>% filter(strain==this.strain.i)
-      this.strain.data.j = data %>% filter(strain==this.strain.j)
+      this.strain.data.i = data %>% dplyr::filter(strain==this.strain.i)
+      this.strain.data.j = data %>% dplyr::filter(strain==this.strain.j)
       
-      selective.rows.i = this.strain.data.i %>% filter(plate=="selective")
-      selective.rows.j = this.strain.data.j %>% filter(plate=="selective")
+      selective.rows.i = this.strain.data.i %>% dplyr::filter(plate=="selective")
+      selective.rows.j = this.strain.data.j %>% dplyr::filter(plate=="selective")
       
-      nonselective.rows.i = this.strain.data.i %>% filter(plate=="nonselective")
-      nonselective.rows.j = this.strain.data.j %>% filter(plate=="nonselective")
+      nonselective.rows.i = this.strain.data.i %>% dplyr::filter(plate=="nonselective")
+      nonselective.rows.j = this.strain.data.j %>% dplyr::filter(plate=="nonselective")
       
       if (nrow(selective.rows.i) == 0 || nrow(nonselective.rows.i) == 0 ) {
         cat("***ERROR! Did not find plate counts for selective/nonselective. Skipping pair\n")
@@ -262,14 +269,14 @@ calculate_mut_rate <- function(filename = NULL,
       }
       
       #all selective plates must have the same fraction
-      selective_fraction_list.i = selective.rows.i %>% count(fraction)
+      selective_fraction_list.i = selective.rows.i %>% dplyr::count(fraction)
       if (nrow(selective_fraction_list.i) > 1) {
         cat("***ERROR! Multiple fractions found for selective plates. Skipping pair\n")
         next
       }
       selective_fraction.i = selective_fraction_list.i$fraction[1]
       
-      selective_fraction_list.j = selective.rows.j %>% count(fraction)
+      selective_fraction_list.j = selective.rows.j %>% dplyr::count(fraction)
       if (nrow(selective_fraction_list.j) > 1) {
         cat("***ERROR! Multiple fractions found for selective plates. Skipping pair\n")
         next
@@ -287,13 +294,13 @@ calculate_mut_rate <- function(filename = NULL,
       # because it is more robust to failures...
       this.result = c()
       if ((selective_fraction.i==1) & (selective_fraction.j==1)) {
-        this.result = LRT.MK(
+        this.result = rsalvador::LRT.MK(
           selective.rows.i$CFU, 
           selective.rows.j$CFU, 
           R = nonselective_cell_counts.j/nonselective_cell_counts.i
         )
       } else {
-        this.result = LRT.LD.plating(
+        this.result = rsalvador::LRT.LD.plating(
           selective.rows.i$CFU, 
           selective.rows.j$CFU, 
           R = nonselective_cell_counts.j/nonselective_cell_counts.i,
@@ -305,12 +312,14 @@ calculate_mut_rate <- function(filename = NULL,
       
       cat("  p-value:", this.p.value, "\n")
       
-      comparison_data = rbind(comparison_data, data.frame(strain.1 = this.strain.i, strain.2 = this.strain.j, p.value = this.p.value))
+      comparison_data = rbind(comparison_data, data.frame(strain.1 = this.strain.i, 
+                                                          strain.2 = this.strain.j, 
+                                                          p.value = this.p.value))
       
     }
   }
   
-  write_csv(comparison_data, paste0(outputPath, "/", outputPrefix, ".comparisons.csv"))
+  readr::write_csv(comparison_data, paste0(outputPath, "/", outputPrefix, ".comparisons.csv"))
   
   
 }
