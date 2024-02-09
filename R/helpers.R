@@ -75,7 +75,7 @@ refactor_reps <- function(data, pooledPrefix = NULL){
   }
 
   # Automatically construct correct factor order for passing to plotter
-  idealOrder <- paste0(repPrefix, 1:1000)
+  idealOrder <- paste0(repPrefix, 0:1000)
   badOrder <- reps
   goodOrder <- c(pooledPrefix, idealOrder[idealOrder %in% badOrder])
 
@@ -161,8 +161,17 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
   # Create the standard folders
   if(mode == "wrangled"){
     wrangledPath <- paste0(outputParent, "/wrangled")
-    if((length(dir(wrangledPath)) > 0) & isFALSE(overwrite)){ # if dir is empty it'll just ignore that it exists
-      stop("The output folder /wrangled/ has files in it! Delete or move the folder and try again.")
+    if(isFALSE(overwrite)){ # if do not overwrite
+      if(length(dir(wrangledPath)) > 0){ # and output folder has files
+        hasCleanFiles <- any(grepl("_pooled.csv$", dir(wrangledPath)) |
+                               grepl("_unpooled.csv$", dir(wrangledPath)))
+      } else {
+        hasCleanFiles <- FALSE
+      }
+      if(hasCleanFiles){ # are any of the files pipeline files?
+        # if yes, then we do not want to overwrite pipeline files at this time.
+        stop("The output folder /wrangled/ has files in it! Delete or move the folder and try again.")
+      }
     }
     dir.create(wrangledPath, showWarnings = FALSE)
     outputPath <- wrangledPath
