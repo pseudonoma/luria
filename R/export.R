@@ -157,12 +157,17 @@ plot_mutrates <- function(data, levelOrder, log = NULL){
 #' @return
 #' If `method` is `"return"` or `"both"`, a numeric vector with elements named by project.
 #'
-#' @keywords internal
+#' @export
 
 extract_mutrates <- function(method = "save", overwrite = FALSE){
 
   # Prep output
   outputPath <- prep_export(mode = "mutrates", overwrite)
+
+  # Grep "project name" file prefixes
+  inputPath <- "./output/analyzed"
+  pooledList <- grep("_pooled.output.csv", dir(inputPath), value = TRUE)
+  projectList <- sub("_pooled.output.csv$", "", pooledList)
 
   # Extract
   mutRates <- c()
@@ -172,11 +177,12 @@ extract_mutrates <- function(method = "save", overwrite = FALSE){
   }
 
   # Export
-  if(export == "save" | export == "both"){
+  if(method == "save" | method == "both"){
     timestamp <- format(Sys.Date(), "%Y-%m-%d")
-    saveRDS(mutRates, file = paste0(outputPath, "/", "mutrate_", timestamp))
+    save(mutRates, file = paste0(outputPath, "/", "mutrate_", timestamp, ".rda"))
+    message("\nMutation rate(s) RData object saved to /analyzed/.")
   }
-  if(export == "return" | export == "both"){
+  if(method == "return" | method == "both"){
 
 
     return(mutRates)
