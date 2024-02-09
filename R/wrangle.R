@@ -18,8 +18,6 @@
 #' C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed as an
 #' integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). The same vector is applied
 #' to all tests. The default values are based on the original *A. baylyi* protocol.
-#' @param poolAs What the pooled strain should be named.
-#' Defaults to `NULL`, in which case the strain is just named *Combined*.
 #' @param exclude A character vector of sheet names (i.e. replicates) to skip. By default the sheet
 #' "Summary" is skipped, but more can be added.
 #' @param saveAs A filename for saving the wrangled file.
@@ -28,7 +26,6 @@
 #' @examples
 #' wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
 #'                  countPops = 4,
-#'                  poolAs = "AB3",
 #'                  exclude = c("Summary", "Rep 0", "Rep 13"),
 #'                  saveAs = "RIF_Aug2023")
 #'
@@ -120,6 +117,8 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 #' @inheritParams wrangle_raw_data
 #' @inheritParams prep_export
 #' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
+#' @param poolAs What the pooled strain should be named.
+#' Defaults to `NULL`, in which case the strain is just named *Combined*.
 #' @param exclude A character vector of replicates to skip.
 #'
 #' @examples
