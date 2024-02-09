@@ -31,4 +31,3 @@ estimate anyway.
 mutrates <- extract_mutrates(method = "both")
 
 }
-\keyword{internal}

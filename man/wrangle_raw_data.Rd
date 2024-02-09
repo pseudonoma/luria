@@ -8,7 +8,6 @@ wrangle_raw_data(
   dataFile,
   countPops,
   countFract = c(P = 200, C = 200, D = 1e+05),
-  poolAs = NULL,
   exclude = "Summary",
   saveAs = NULL,
   overwrite = FALSE
@@ -26,9 +25,6 @@ C = volume of Count culture used for dilution, in uL; and D = dilution factor, e
 integer (eg. \eqn{10^{3}}) and \strong{not} a ratio (eg. \eqn{10^{-3}}). The same vector is applied
 to all tests. The default values are based on the original \emph{A. baylyi} protocol.}
 
-\item{poolAs}{What the pooled strain should be named.
-Defaults to \code{NULL}, in which case the strain is just named \emph{Combined}.}
-
 \item{exclude}{A character vector of sheet names (i.e. replicates) to skip. By default the sheet
 "Summary" is skipped, but more can be added.}
 
@@ -43,14 +39,13 @@ Defaults to \code{FALSE}.}
 Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
 }
 \details{
-This function produces two CSV files, one with all replicates pooled into one strain, and another
-CSV with the replicates kept separate. The output CSV has the columns \code{strain}, \code{plate},
-\code{fraction}, and \code{CFU}, which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
+This function produces a CSV file with columns \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}, the
+standard format required by the rest of the pipeline. The next function in the pipeline is
+\code{\link[=wrangle_clean_data]{wrangle_clean_data()}}.
 }
 \examples{
 wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
                  countPops = 4,
-                 poolAs = "AB3",
                  exclude = c("Summary", "Rep 0", "Rep 13"),
                  saveAs = "RIF_Aug2023")
 

@@ -19,8 +19,8 @@ populate_rows(
 
 \item{currentMutants}{\emph{Selective} data from the current sheet.}
 
-\item{countFraction}{\emph{fraction} value for the \emph{Count} populations; generated from \code{countVars} in
-the wrapper function.}
+\item{countFraction}{\emph{fraction} value for the \emph{Count} populations; generated from \code{countFraction}
+in the wrapper function.}
 
 \item{countPops}{The number of \emph{Count} populations used.}
 }

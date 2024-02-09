@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrangle.R
 \name{wrangle_clean_data}
 \alias{wrangle_clean_data}
-\title{Prepare a previously-wrangled CSV file for the pipeline.}
+\title{Create standardized pooled and unpooled data files for the pipeline.}
 \usage{
 wrangle_clean_data(
   dataFile,
@@ -31,8 +31,9 @@ Defaults to \code{FALSE}.}
 Two tidy CSVs with columns \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}.
 }
 \description{
-If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
-was not used, this function prepares the CSV file for use with the pipeline.
+Prepare CSV files previously wrangled by \code{\link[=wrangle_raw_data]{wrangle_raw_data()}} for the rest of the
+pipeline. Correctly-formatted CSVs otherwise created (e.g. if the Excel template was not
+used) can also be prepared for the pipeline with this function.
 }
 \details{
 This function produces two CSV files, one with all replicates pooled into one strain, and another

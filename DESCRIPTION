@@ -1,15 +1,23 @@
 Package: luria
-Title: A Package for Fluctuation Analysis
-Version: 0.0.0.9000
-Authors@R: 
-    person("Ian", "Gooi", , "ian.yc.gooi@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Title: A Pipeline for Fluctuation Analysis
+Version: 0.1.0
+Authors@R: c(
+    person("Ian", "Gooi", 
+           email = "ian.gooi@uq.net.au", 
+           role = c("aut", "cre")),
+    person("Jeffrey", "Barrick",
+           email = "jbarrick@cm.utexas.edu",
+           role = "aut")
+    )
+Description: This package provides a framework and data analysis pipeline for
+    conducting fluctuation analysis, from wrangling raw colony count data to
+    producing plots of pooled and unpooled mutation rate estimates. It is 
+    built around a function originally written by the Barrick Lab, which in 
+    turn uses the package rSalvador to estimate and compare mutation rates.
+License: use_gpl3_license()
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports: 
     dplyr,
     forcats,
@@ -19,5 +27,5 @@ Imports:
     rsalvador (>= 1.9),
     tibble,
     utils
-Remotes:  
+Remotes: 
     github::eeeeeric/rSalvador/rsalvador
