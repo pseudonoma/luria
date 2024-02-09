@@ -35,8 +35,7 @@
 #' @export
 
 wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 200, D = 1E5),
-                             poolAs = NULL, exclude = "Summary",
-                             saveAs = NULL, overwrite = FALSE){
+                             exclude = "Summary", saveAs = NULL, overwrite = FALSE){
 
   # Prep some variables
   allSheets <- openxlsx::getSheetNames(dataFile)
@@ -46,9 +45,8 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
     stop("Couldn't calculate Count plating fraction; check that countFract is a named vector.")
   }
 
-  # Prep the two master dfs
-  allUnpooled <- data.frame()
-  allPooled <- data.frame()
+  # Make overall dataframe object
+  allData <- data.frame()
 
   # Loop over sheets and fill the master dfs
   for(sheet in sheetNames){
@@ -62,24 +60,26 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
                                           cols = 7:8)
     currentCounts$mean <- rowMeans(currentCounts, na.rm = TRUE) # compute count plate means
 
-    # prep the two streams of current dfs
-    if(is.null(poolAs)){
-      poolStrain <- "Combined"
-    } else {
-      poolStrain <- poolAs
-    }
-    unpooledData <- data.frame(strain = rep(sheet, nrow(currentCounts) + (60 - countPops)),
-                               plate = NA, fraction = NA, CFU = NA)
-    pooledData <- data.frame(strain = rep(poolStrain, nrow(currentCounts) + (60 - countPops)),
-                             plate = NA, fraction = NA, CFU = NA)
+    # # prep the two streams of current dfs
+    # if(is.null(poolAs)){
+    #   poolStrain <- "Combined"
+    # } else {
+    #   poolStrain <- poolAs
+    # }
+    # unpooledData <- data.frame(strain = rep(sheet, nrow(currentCounts) + (60 - countPops)),
+    #                            plate = NA, fraction = NA, CFU = NA)
+    # pooledData <- data.frame(strain = rep(poolStrain, nrow(currentCounts) + (60 - countPops)),
+    #                          plate = NA, fraction = NA, CFU = NA)
+
+    # Prep current data
+    currentData <- data.frame(strain = rep(sheet, nrow(currentCounts) + (60 - countPops)),
+                              plate = NA, fraction = NA, CFU = NA)
 
     # run the populating function
-    unpooledData <- populate_rows(unpooledData, currentCounts, currentMutants, countFraction, countPops)
-    pooledData <- populate_rows(pooledData, currentCounts, currentMutants, countFraction, countPops)
+    currentData <- populate_rows(currentData, currentCounts, currentMutants, countFraction, countPops)
 
-    # append both streams of current dfs to their master dfs and report
-    allUnpooled <- rbind(allUnpooled, unpooledData)
-    allPooled <- rbind(allPooled, pooledData)
+    # append current df to master df and report
+    allData <- rbind(allData, currentData)
     cat(paste0("Sheet ", "\"", sheet, "\" ", "done.\n"))
 
   } # loop exit #
@@ -98,9 +98,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
   }
 
   # Write file and report
-  write.csv(allUnpooled, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
-  write.csv(allPooled, paste0(exportName, "_pooled.csv"), row.names = FALSE)
-
+  write.csv(allData, paste0(exportName, ".csv"), row.names = FALSE)
   message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
 
 
