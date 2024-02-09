@@ -7,6 +7,8 @@ Authors@R: c(
            role = c("aut", "cre")),
     person("Jeffrey", "Barrick",
            email = "jbarrick@cm.utexas.edu",
+           role = "aut"),
+    person("Daniel", "Deatherage",
            role = "aut")
     )
 Description: This package provides a framework and data analysis pipeline for
