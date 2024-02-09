@@ -3,9 +3,9 @@
 #' Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
 #'
 #' @details
-#' This function produces two CSV files, one with all replicates pooled into one strain, and another
-#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`,
-#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
+#' This function produces a CSV file with columns `strain`, `plate`, `fraction`, and `CFU`, the
+#' standard format required by the rest of the pipeline. The next function in the pipeline is
+#' [`wrangle_clean_data()`].
 #'
 #' @import openxlsx
 #'
@@ -104,10 +104,11 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 }
 
 
-#' Prepare a previously-wrangled CSV file for the pipeline.
+#' Create standardized pooled and unpooled data files for the pipeline.
 #'
-#' If a correctly-formatted CSV file was wrangled manually, or the fluctuation analysis workbook
-#' was not used, this function prepares the CSV file for use with the pipeline.
+#' Prepare CSV files previously wrangled by [`wrangle_raw_data()`] for the rest of the
+#' pipeline. Correctly-formatted CSVs otherwise created (e.g. if the Excel template was not
+#' used) can also be prepared for the pipeline with this function.
 #'
 #' @details
 #' This function produces two CSV files, one with all replicates pooled into one strain, and another
