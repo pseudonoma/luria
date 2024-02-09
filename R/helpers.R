@@ -198,6 +198,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
     if(any(hasMuts) & isFALSE(overwrite)){
       stop("The output folder /analyzed/ has a mutation rate file in it! Delete or move the folder and try again.")
     }
+    outputPath <- mutsPath
 
   } else if(is.null(mode)){
     stop("prep_export mode is NULL! This shouldn't have happened, please report this bug.")
