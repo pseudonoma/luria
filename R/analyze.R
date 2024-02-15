@@ -13,8 +13,6 @@
 #' argument runs this function in single-file mode. In standard pipeline mode, comparisons are only
 #' made using unpooled data.
 #'
-#' @import utils
-#'
 #' @inheritParams prep_export
 #' @param file The filename of a correctly-formatted CSV file to estimate mutation rates from.
 #' Supplying this will cause the function to run in single-file mode.
