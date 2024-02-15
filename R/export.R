@@ -212,6 +212,9 @@ get_template <- function(saveTo = ".", saveAs = "template"){
   # Read the file in
   wb <- openxlsx::loadWorkbook()
 
+  # Handle folders
+  dir.create("saveTo", recursive = TRUE)
+
   # Save the back out
   openxlsx::saveWorkbook(wb, paste0(saveTo, "/", saveAs, ".xlsx"))
   message(paste0("Data template saved to", saveTo))
