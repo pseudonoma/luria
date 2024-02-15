@@ -189,3 +189,34 @@ extract_mutrates <- function(method = "save", overwrite = FALSE){
 
   }
 }
+
+
+#' Save a copy of the fluctuation analysis data template.
+#'
+#' This function saves to a particular location a copy of the Excel spreadsheet template for
+#' recording fluctuation analysis data .
+#'
+#' @param saveTo Path to save the template file. Defaults to the project root.
+#' @param saveAs Filename to use. The default filename is "template.xlsx".
+#'
+#' @examples
+#' get_template("./data", "my_data_template")
+#'
+#' @export
+
+get_template <- function(saveTo = ".", saveAs = "template"){
+
+  # Doing this by reading in the file and saving it back out so I don't have to deal
+  # with low-level file manipulation across Windows and UNIX. Fuck that shit.
+
+  # Read the file in
+  wb <- openxlsx::loadWorkbook()
+
+  # Save the back out
+  openxlsx::saveWorkbook(wb, paste0(saveTo, "/", saveAs, ".xlsx"))
+  message(paste0("Data template saved to", saveTo))
+
+
+  return(invisible())
+
+}
