@@ -96,7 +96,7 @@ wrangle_raw_data <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 
   # Write file and report
   write.csv(allData, paste0(exportName, ".csv"), row.names = FALSE)
-  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
+  message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
 
 
   return(invisible())
@@ -136,7 +136,7 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
                                saveAs = NULL, overwrite = FALSE){
 
   # Explicitly set mode
-  runMode <- ifelse(is.null(file), yes = "standard", no = "single")
+  runMode <- ifelse(is.null(dataFile), yes = "standard", no = "single")
 
   # Handle export pathing
   exportPath <- prep_export(mode = "wrangled", overwrite)
@@ -144,12 +144,12 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
   # Define standard header for checks
   headers <- c("strain", "plate", "fraction", "CFU")
 
-  # Define wrangler subroutine #####
-  do_wrangle <- function(data, poolAs, exclude, saveAs, exportPath){
+  ### Define wrangle-export subroutine #####
+  do_wrangle <- function(data, baseName, poolAs, exclude, saveAs){
 
     # Crudely read in pooled/unpooled data, sans excluded strains
-    pooledData <- df[!(df$strain %in% exclude), ]
-    unpooledData <- df[!(df$strain %in% exclude), ]
+    pooledData <- data[!(data$strain %in% exclude), ]
+    unpooledData <- data[!(data$strain %in% exclude), ]
     if(is.null(poolAs)){
       pooledData$strain <- "Combined"
     } else {
@@ -159,8 +159,8 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
     # Construct export filename
     if(is.null(saveAs)){
       # extract basename & construct exportName
-      baseName <- sub(".csv", "", basename(dataFile))
-      exportName <- paste0(exportPath, "/", baseName)
+      baserName <- sub(".csv", "", baseName)
+      exportName <- paste0(exportPath, "/", baserName)
     } else {
       # or construct using <saveAs> value
       exportName <- paste0(exportPath, "/", saveAs)
@@ -170,53 +170,58 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
     write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
     write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
 
-  } ##### END do_wrangler() #####
+  } ### end do_wrangle() #####
 
-  # Begin wrangling
+  # Begin wrangle
+
+  ##### Single-file mode #####
   if(runMode == "single"){
 
-    # Read in file, check validity, and wrangle
-    df <- read.csv(dataFile)
-    if(all(headers %in% names(df))){
+    # Read in file
+    data <- read.csv(dataFile)
+    baseName <- basename(dataFile)
 
-      # Wrangle & export
-      do_wrangle(data, poolAs, exclude, saveAs, exportPath)
-
-    } else { # headers appear invalid
+    # If headers are valid, wrangle & export
+    if(all(headers %in% names(data))){
+      do_wrangle(data, baseName, poolAs, exclude, saveAs)
+    } else {
+      # headers appear invalid
       stop("The required columns are missing or incorrectly named. Check your file and try again.")
     }
 
+    ##### Standard pipeline mode #####
   } else if(runMode == "standard"){
-    # needs to run on all available CSVs
-    # how do we know if the inputs are valid?
-    # == Check only CSVs | if CSVs have header, is valid?
-    # == if not a CSV | if do not have header, skip? Report? What the fuck man I thought I was done
 
-    # Get CSVs from inputPath, but only allow non-pipeline files in case overwriting is active
-    # and pipeline files could get re-cleaned.
+    # Get CSVs from the standard input location...
     inputPath <- "./output/wrangled"
-    csvList <- grep(".csv$", dir(inputPath), value = TRUE)
-    pooledList <- grep("_pooled.csv$", dir(inputPath), value = TRUE)
-    unpooledList <- grep("_unpooled.csv$", dir(inputPath), value = TRUE)
+    csvList <- grep(".csv$", dir(inputPath, full.names = TRUE), value = TRUE)
+    # ...and grab only CSVs which don't look like pipeline files (in case overwrite = T)
+    pooledList <- grep("_pooled.csv$", dir(inputPath, full.names = TRUE), value = TRUE)
+    unpooledList <- grep("_unpooled.csv$", dir(inputPath, full.names = TRUE), value = TRUE)
     validList <- csvList[which(!(csvList %in% pooledList) & !(csvList %in% unpooledList))]
 
-    # Begin looping over all CSVs
-    for(file in validList){
-      # reconstitute filename
-      filePath <- paste0(inputPath, "/", file)
-      df <- read.csv(filePath)
-      # if(all(headers %in% names(df))){
-      #   message(paste0("Processing ", basename(file)))
-      #   do_wrangle(data, poolAs, exclude, saveAs, exportPath)
-      # }
+    # Catch no valid files
+    if(length(validList == 0)){
+      stop("No valid files to process. Note that pooled/unpooled file pairs are already processed.")
     }
 
+    # Loop over valid, non-pipeline CSVs
+    for(file in validList){
+
+      # Read in files just like single-mode
+      currentData <- read.csv(file)
+      baseName <- basename(file)
+
+      # If headers are valid, wrangle & export
+      if(all(headers %in% names(currentData))){
+        message(paste0("Processing ", baseName))
+        do_clean_wrangle(currentData, baseName, poolAs, exclude, saveAs)
+      }
+    } # (no error message here because it's not the user's job to validate inputs?)
 
   }
 
-
-
-  message("\nDone. Check /wrangled/ for the wrangled .csv files.\n")
+  message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
 
 
   return(invisible())
