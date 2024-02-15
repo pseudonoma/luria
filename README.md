@@ -120,23 +120,23 @@ extract_mutrates()
 Plots and extracted mutation rates are by default saved back into
 `output/analyzed/`.
 
-## (Slightly) More Details
+## A Little More Detail
 
-`luria` actually implicitly runs in one of two modes: the standard
-pipeline mode described above, and a individual-file mode which allows
-you to pass some of the functions individual files without having to
-follow the pipeline format.
+The package actually implicitly runs in one of two modes: the standard
+pipeline mode described above, and a single-file mode which allows you
+to pass some of the functions individual files without having to follow
+the pipeline format.
 
 ### Pipeline mode
 
 When wrangling the raw files with `wrangle_raw_data()` or
 `wrangle_clean_data()`, multiple datasets can be wrangled and saved to
 the standard output folder `output/wrangled/`. Each file wrangled this
-way constitutes a “project”; the original filename is preserved in
-output files as a “project name”, to which is appended e.g. a suffix
-like `.output` that indicates what kind of output file it is. You can
-change the filename of the wrangled file using the `saveAs` argument in
-either of the `wrangle_` functions.
+way constitutes a “project”; by default the original filename is
+preserved in output files as a “project name”, to which is appended (for
+example) a suffix like `.output` that indicates what kind of output file
+it is. You can change the filename of the wrangled file using the
+`saveAs` argument in either of the `wrangle_` functions.
 
 In pipeline mode, `run_fluxxer()`, `plot_fluxxer()`, and
 `export_mutrates()` automatically processes the appropriate input files

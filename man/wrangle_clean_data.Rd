@@ -5,7 +5,7 @@
 \title{Create standardized pooled and unpooled data files for the pipeline.}
 \usage{
 wrangle_clean_data(
-  dataFile,
+  dataFile = NULL,
   poolAs = NULL,
   exclude = NULL,
   saveAs = NULL,

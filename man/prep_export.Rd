@@ -18,7 +18,7 @@ Defaults to \code{FALSE}.}
 A string indicating the output folder path.
 }
 \description{
-This function is called by all frontend function that produce file outputs, namely
+This function is called by all frontend functions that produce file outputs, namely
 \code{\link[=wrangle_raw_data]{wrangle_raw_data()}}, \code{\link[=wrangle_clean_data]{wrangle_clean_data()}}, \code{\link[=run_fluxxer]{run_fluxxer()}}, and \code{\link[=plot_fluxxer]{plot_fluxxer()}}.
 It always attempts to create the top-level output folder \verb{./output/} whenever it's called,
 and enforces output folder structure by (a) checking if the output subfolder exists and if
