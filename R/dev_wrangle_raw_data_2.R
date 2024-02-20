@@ -18,7 +18,8 @@ wrangle_raw_data_2 <- function(templateFile, autofill = TRUE, exclude = NULL){
 
   # DEBUG:
   templateFile <- "./dev/data/raws redesign/testbed.xlsx"
-  sheet <- sheetNames[2]
+  allSheets <- openxlsx::getSheetNames(templateFile)
+  sheet <- allSheets[2]
 
   ###
 
@@ -30,22 +31,31 @@ wrangle_raw_data_2 <- function(templateFile, autofill = TRUE, exclude = NULL){
   allData <- data.frame()
   for(sheet in sheetNames){
 
-    # get current raw rep & split datasets
+    dilution <- 100000
+
+    # get current raw rep and clean up
     currentSheet <- openxlsx::read.xlsx(templateFile, sheet = sheet)
+    cols <- c("Name", "Type", "Well", "Volume.taken", "Volume.plated", "Dilution.factor",
+              "CFU.observed")
+    currentSheet <- currentSheet[, cols]
+    currentSheet <- currentSheet[currentSheet$Dilution.factor == dilution, ]
+
+    # split datasets
     currentCounts <- currentSheet[currentSheet$Type == "Count", ]
     currentMutants <- currentSheet[currentSheet$Type == "Selective", ]
 
     # prep current export df
     currentData <- data.frame(strain = NA, plate = NA, fraction = NA, CFU = NA)
 
-    currentData <-
+    test <-
       currentCounts |>
-      dplyr::group_by(Well, Dilution.factor) |>
-      dplyr::summarize(strain = Name,
-                       plate = Type,
-                       fraction = NA,
-                       CFU = mean(CFU.observed))
+      dplyr::group_by(Name, Type, Well, Volume.taken, Volume.plated,
+                      Dilution.factor) |>
+      #dplyr::mutate(CFU = mean(CFU.observed)) |>
+      dplyr::summarize(CFU = mean(CFU.observed)) |>
+      dplyr::ungroup()
 
+    currentData$CFU <- test$CFU
 
     currentCounts$mean <- rowMeans(currentCounts, na.rm = TRUE) # compute count plate means
 
