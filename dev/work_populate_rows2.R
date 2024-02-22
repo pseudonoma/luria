@@ -23,42 +23,37 @@ currentMutants <- currentSheet[currentSheet$Type == "Selective", ]
 
 # summarize Count data (should probably just use dplyr for everything)
 count.dilution <- 1e5 # exclusion
-currentCounts <- currentCounts[currentCounts$Dilution.factor == count.dilution, ]
 
 # collapse CFUs
 currentCounts <-
   currentCounts |>
+  filter(Dilution.factor == count.dilution) |>
   dplyr::group_by(Name, Type, Well, Volume.taken, Volume.plated,
                   Dilution.factor) |>
-  #dplyr::mutate(CFU = mean(CFU.observed)) |>
   dplyr::summarize(CFU = mean(CFU.observed)) |>
   dplyr::ungroup()
-# at this point, currentCounts is ready to populate allData
-# do I even know how to code, fuck
 
 # Establish total row count before currentData can be prepped
 countLength <- nrow(currentCounts)
 mutantLength <- nrow(currentMutants)
-if(autofill){
-  rowTotal <- 60 # ?
-} else if(mutantLength == 0){
-  rowTotal <- countLength + 1 # an extra Mutant observation, which will be set to 0
-  mutantLength <- 1
-} else if(mutantLength >= 1){
+if(autofill){ # fill to standard plate capacity
+  rowTotal <- 60
+} else if(mutantLength >= 1){ # do not fill & >=1 mutant has CFUs
   rowTotal <- countLength + mutantLength
+} else if(mutantLength == 0){
+  warning(paste("Skipping <rep> because there are no mutants."))
 }
-
-# nts 21/02/24: seems like there's two directions, rowTotal - data, vs. count + mutant
-# ideally count + mutant = rowTotal? Why does there seem to be a conflict, is it because of the
-#  +1 mutant with 0 observations step?
 
 # Check if every detected Count population is distinct
 if(length(unique(currentCounts$Well)) != countLength){
-  stop("No. of Count observations != No. of unique Count wells reported.")
+  stop("No. of Count observations != No. of unique Count wells reported. This might be a problem.")
 }
 
 # Prep currentData
 strain <- unique(currentSheet$Name)
+if(length(strain) > 1){
+  stop("Multiple replicate names detected in a single replicate dataset.")
+}
 currentData <- data.frame(strain = rep(strain, rowTotal),
                           plate = NA,
                           fraction = NA,
@@ -73,22 +68,37 @@ for(i in 1:countLength){
 }
 
 # Fill Selective rows
-mutantStart <- countLength + 1
+# Special case: no mutants counted. Needs its own branch?
 
-# begin filling Selective rows (this code doesn't work in the case of the 0 row!)
+
+# Begin filling Selective rows...
+mutantStart <- countLength + 1
+mutantEnd <- countLength + mutantLength
 currentData$plate[mutantStart:(countLength + mutantLength)] <- "Selective"
 currentData$fraction[mutantStart:(countLength + mutantLength)] <-
-  currentMutants$Volume.plated[i]/(currentMutants$Volume.taken[i] * currentMutants$Dilution.factor[i])
+  currentMutants$Volume.plated/(currentMutants$Volume.taken * currentMutants$Dilution.factor)
+currentData$CFU[mutantStart:(countLength + mutantLength)] <- currentMutants$CFU.observed
 
+# ...and finish filling Selective rows with 0
+if(rowTotal > countLength + mutantLength){ # implies fill was active
+  fillStart <- mutantEnd + 1
+  currentData$plate[fillStart:rowTotal] <- "Selective"
+  currentData$fraction[fillStart:rowTotal] <-  mean(currentData$fraction[currentData$plate == "Selective"],
+                                                    na.rm = TRUE)
+  currentData$CFU[fillStart:rowTotal] <- 0
+}
+
+
+
+
+
+
+# 0 CFU mutant case
 if(nrow(currentMutants) == 0){
   currentData$CFU[countLength+1] <- 0 #
 } else{
-  currentData$CFU[(countLength+1):(countLength+mutantLength)] <- currentMutants$Count
+
 }
-
-# finish filling Selective rows with 0
-
-
 
 ### junk ###
 
