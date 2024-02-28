@@ -70,7 +70,7 @@ wrangle_raw_data_2 <- function(templateFile, exclude = NULL, fill = 60, dilution
     }
     currentData <- data.frame(strain = rep(strain, rowTotal), plate = NA, fraction = NA, CFU = NA)
 
-    # Begin fill #
+    ##### Begin fill #####
 
     # 1. Fill Count rows
     for(i in 1:countLength){
@@ -96,6 +96,8 @@ wrangle_raw_data_2 <- function(templateFile, exclude = NULL, fill = 60, dilution
                                                         na.rm = TRUE)
       currentData$CFU[fillStart:rowTotal] <- 0
     }
+
+    ##### End fill #####
 
     # Append current df to master df and report
     exportData <- rbind(exportData, currentData)

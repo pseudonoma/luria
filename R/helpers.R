@@ -1,6 +1,6 @@
 #' Helper function for converting sheet data.
 #'
-#' This function is called by [`wrangle_raw_data()`] inside the by-sheet loop. It takes a fluxxer-
+#' This function is called by [`wrangle_old_raws()`] inside the by-sheet loop. It takes a fluxxer-
 #' formatted dataframe and uses the arguments to populate the rest of the rows, before returning
 #' the dataframe.
 #'
