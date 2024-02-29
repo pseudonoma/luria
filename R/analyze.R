@@ -5,15 +5,13 @@
 #'
 #' @details
 #' This function calls [`calculate_mut_rate()`] to estimate mutation rates. It can run on a single
-#' file, or cycle automatically through all files saved to ./output/wrangled/ by the previous step
+#' file, or cycle automatically through all files saved to `./output/wrangled/` by the previous step
 #' in the pipeline. For every input file, a matching output file ending in `.output.csv` will be
 #' saved to `./output/analyzed`. If `comparisons` is `TRUE`, an additional file will be generated
 #' ending in `.comparisons.csv`; this file contains pairwise comparisons between all replicates and
 #' p-values indicating how different the mutation rates are from each other. Supplying the `file`
 #' argument runs this function in single-file mode. In standard pipeline mode, comparisons are only
 #' made using unpooled data.
-#'
-#' @import utils
 #'
 #' @inheritParams prep_export
 #' @param file The filename of a correctly-formatted CSV file to estimate mutation rates from.
@@ -92,14 +90,13 @@ run_fluxxer <- function(file = NULL, comparisons = TRUE, overwrite = FALSE){
 #' Calculate mutation rates.
 #'
 #' A minimally-modified version of `calculateMutRate()` from the original
-#' [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R) script.
+#' [`fluxxer.R`](https://github.com/barricklab/barricklab/blob/master/fluxxer.R) script. Do not call
+#' this function manually; use [`run_fluxxer()`] instead.
 #'
 #' @details
 #' This function uses the rSalvador package to obtain the maximum likelihood estimates for
-#' mutation rates based on the Luria-Delbruck distribution.
-#' Do not call this function manually - use [`run_fluxxer()`] instead, which supplies the
-#' appropriate arguments. This version does not produce plots, as it is handled by the pipeline
-#' function [`plot_fluxxer()`].
+#' mutation rates based on the Luria-Delbruck distribution. This version does not produce plots, as
+#' it is handled by the pipeline function [`plot_fluxxer()`].
 #'
 #' @import rsalvador dplyr tibble readr
 #'

@@ -5,7 +5,7 @@
 \title{Create standardized pooled and unpooled data files for the pipeline.}
 \usage{
 wrangle_clean_data(
-  dataFile,
+  dataFile = NULL,
   poolAs = NULL,
   exclude = NULL,
   saveAs = NULL,
@@ -37,9 +37,24 @@ used) can also be prepared for the pipeline with this function.
 }
 \details{
 This function produces two CSV files, one with all replicates pooled into one strain, and another
-CSV with the replicates kept separate. The output CSV has the columns \code{strain}, \code{plate},
-\code{fraction}, and \code{CFU}, which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
+CSV with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
+which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
 }
+\section{Output CSV format}{
+
+The resulting CSV is a tidy table with four columns:
+\itemize{
+\item \code{strain} - The name of the replicate
+\item \code{plate} - The type of plate, either \emph{Count} or \emph{Selective}
+\item \code{fraction} - The fraction of culture plated (see below)
+\item \code{CFU} - The observed number of colonies on the plate.
+}
+Additionally, fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL;
+C = volume of Count culture used for dilution, in uL; and D = dilution factor. Note that D is
+expressed as an integer (eg. \eqn{10^{3}}) and not a ratio (eg. \eqn{10^{-3}}). Fraction is
+calculated individually for every observation in the raw file.
+}
+
 \examples{
 wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
                    poolAs = "AB3",

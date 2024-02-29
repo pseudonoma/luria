@@ -1,6 +1,6 @@
 #' Helper function for converting sheet data.
 #'
-#' This function is called by [`wrangle_raw_data()`] inside the by-sheet loop. It takes a fluxxer-
+#' This function is called by [`wrangle_old_raws()`] inside the by-sheet loop. It takes a fluxxer-
 #' formatted dataframe and uses the arguments to populate the rest of the rows, before returning
 #' the dataframe.
 #'
@@ -123,7 +123,7 @@ test_logticks <- function(data){
 
 #' Helper function for setting up and checking folder structure and pathing.
 #'
-#' This function is called by all frontend function that produce file outputs, namely
+#' This function is called by all frontend functions that produce file outputs, namely
 #' [`wrangle_raw_data()`], [`wrangle_clean_data()`], [`run_fluxxer()`], and [`plot_fluxxer()`].
 #' It always attempts to create the top-level output folder `./output/` whenever it's called,
 #' and enforces output folder structure by (a) checking if the output subfolder exists and if
@@ -158,7 +158,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
             call. = FALSE)
   }
 
-  # Create the standard folders
+  # Handle particular export requirements & path structure
   if(mode == "wrangled"){
     wrangledPath <- paste0(outputParent, "/wrangled")
     if(isFALSE(overwrite)){ # if do not overwrite
@@ -170,7 +170,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
       }
       if(hasCleanFiles){ # are any of the files pipeline files?
         # if yes, then we do not want to overwrite pipeline files at this time.
-        stop("The output folder /wrangled/ has files in it! Delete or move the folder and try again.")
+        stop("output/wrangled/ has pipeline files in it! Delete or move the folder and try again.")
       }
     }
     dir.create(wrangledPath, showWarnings = FALSE)
@@ -179,7 +179,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
   } else if(mode == "analyzed"){
     analyzedPath <- paste0(outputParent, "/analyzed")
     if((length(dir(analyzedPath)) > 0) & isFALSE(overwrite)){
-      stop("The output folder /analyzed/ has files in it! Delete or move the folder and try again.")
+      stop("output/analyzed/ has files in it! Delete or move the folder and try again.")
     }
     dir.create(analyzedPath, showWarnings = FALSE)
     outputPath <- analyzedPath
@@ -188,7 +188,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
     plotsPath <- paste0(outputParent, "/analyzed") # pops it back into the same folder
     hasPlots <- grepl("^plot_", dir(plotsPath))
     if(any(hasPlots) & isFALSE(overwrite)){
-      stop("The output folder /analyzed/ has plots in it! Delete or move the folder and try again.")
+      stop("output/analyzed/ has plots in it! Delete or move the folder and try again.")
     }
     outputPath <- plotsPath
 
@@ -196,12 +196,12 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
     mutsPath <- paste0(outputParent, "/analyzed")
     hasMuts <- grepl("^mutrate_", dir(mutsPath))
     if(any(hasMuts) & isFALSE(overwrite)){
-      stop("The output folder /analyzed/ has a mutation rate file in it! Delete or move the folder and try again.")
+      stop("output/analyzed/ has a mutation rate file in it! Delete or move the folder and try again.")
     }
     outputPath <- mutsPath
 
   } else if(is.null(mode)){
-    stop("prep_export mode is NULL! This shouldn't have happened, please report this bug.")
+    stop("prep_export mode is NULL, which shouldn't have happened. Please report this bug.")
   }
 
 

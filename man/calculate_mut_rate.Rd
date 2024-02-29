@@ -23,12 +23,11 @@ calculate_mut_rate(
 }
 \description{
 A minimally-modified version of \code{calculateMutRate()} from the original
-\href{https://github.com/barricklab/barricklab/blob/master/fluxxer.R}{\code{fluxxer.R}} script.
+\href{https://github.com/barricklab/barricklab/blob/master/fluxxer.R}{\code{fluxxer.R}} script. Do not call
+this function manually; use \code{\link[=run_fluxxer]{run_fluxxer()}} instead.
 }
 \details{
 This function uses the rSalvador package to obtain the maximum likelihood estimates for
-mutation rates based on the Luria-Delbruck distribution.
-Do not call this function manually - use \code{\link[=run_fluxxer]{run_fluxxer()}} instead, which supplies the
-appropriate arguments. This version does not produce plots, as it is handled by the pipeline
-function \code{\link[=plot_fluxxer]{plot_fluxxer()}}.
+mutation rates based on the Luria-Delbruck distribution. This version does not produce plots, as
+it is handled by the pipeline function \code{\link[=plot_fluxxer]{plot_fluxxer()}}.
 }

@@ -23,7 +23,7 @@ as the next step in the pipeline, and output them as CSV files.
 }
 \details{
 This function calls \code{\link[=calculate_mut_rate]{calculate_mut_rate()}} to estimate mutation rates. It can run on a single
-file, or cycle automatically through all files saved to ./output/wrangled/ by the previous step
+file, or cycle automatically through all files saved to \verb{./output/wrangled/} by the previous step
 in the pipeline. For every input file, a matching output file ending in \code{.output.csv} will be
 saved to \code{./output/analyzed}. If \code{comparisons} is \code{TRUE}, an additional file will be generated
 ending in \code{.comparisons.csv}; this file contains pairwise comparisons between all replicates and

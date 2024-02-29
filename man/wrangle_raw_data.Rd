@@ -5,28 +5,28 @@
 \title{Convert a fluctuation analysis Excel workbook.}
 \usage{
 wrangle_raw_data(
-  dataFile,
-  countPops,
-  countFract = c(P = 200, C = 200, D = 1e+05),
-  exclude = "Summary",
+  templateFile,
+  exclude = c("Example layout", "Column guide"),
+  fill = 60,
+  dilution = 1e+05,
   saveAs = NULL,
   overwrite = FALSE
 )
 }
 \arguments{
-\item{dataFile}{The filename of the standard Excel workbook.}
+\item{templateFile}{The filename of the standard Excel workbook.}
 
-\item{countPops}{An integer value indicating how many Count populations were used in each test.
-This should be one value for all tests, and it should not account for failed Count plates.}
+\item{exclude}{A character vector of sheet names (e.g. replicates) to skip. By default the
+help sheets \emph{Example layout} and \emph{Column guide} is skipped, but more can be added.}
 
-\item{countFract}{A named vector for calculating the fraction plated, F, of the Count
-populations. Fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL;
-C = volume of Count culture used for dilution, in uL; and D = dilution factor, expressed as an
-integer (eg. \eqn{10^{3}}) and \strong{not} a ratio (eg. \eqn{10^{-3}}). The same vector is applied
-to all tests. The default values are based on the original \emph{A. baylyi} protocol.}
+\item{fill}{A number indicating the true number of populations (i.e. wells) in each replicate.
+Additional \emph{Selective} populations will be added with 0 CFU, up to this number. If \code{NULL}, no
+filling will occur and only recorded populations will be used.
+Defaults to \code{60}, the number of populations in a standard 96-well plate.}
 
-\item{exclude}{A character vector of sheet names (i.e. replicates) to skip. By default the sheet
-"Summary" is skipped, but more can be added.}
+\item{dilution}{A \emph{Count} population dilution factor to use for wrangling. The same factor will
+be used for all replicates.
+Defaults to \code{1e5}, the standard dilution rate for the \emph{A. baylyi} and \emph{E. coli} protocols.}
 
 \item{saveAs}{A filename for saving the wrangled file.
 Defaults to \code{NULL}, in which case the original filename will be used.}
@@ -39,14 +39,28 @@ Defaults to \code{FALSE}.}
 Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
 }
 \details{
-This function produces a CSV file with columns \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}, the
-standard format required by the rest of the pipeline. The next function in the pipeline is
+This function converts raw data contained in an Excel workbook template into a standardized CSV
+file which is required by downstream functions. The next function in the pipeline is
 \code{\link[=wrangle_clean_data]{wrangle_clean_data()}}.
 }
+\section{Output CSV format}{
+
+The resulting CSV is a tidy table with four columns:
+\itemize{
+\item \code{strain} - The name of the replicate
+\item \code{plate} - The type of plate, either \emph{Count} or \emph{Selective}
+\item \code{fraction} - The fraction of culture plated (see below)
+\item \code{CFU} - The observed number of colonies on the plate.
+}
+Additionally, fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL;
+C = volume of Count culture used for dilution, in uL; and D = dilution factor. Note that D is
+expressed as an integer (eg. \eqn{10^{3}}) and not a ratio (eg. \eqn{10^{-3}}). Fraction is
+calculated individually for every observation in the raw file.
+}
+
 \examples{
-wrangle_raw_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
-                 countPops = 4,
-                 exclude = c("Summary", "Rep 0", "Rep 13"),
+wrangle_raw_data(templateFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
+                 exclude = c("Rep 0", "Rep 13"),
                  saveAs = "RIF_Aug2023")
 
 }
