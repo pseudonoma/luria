@@ -18,7 +18,7 @@
 
 #' Additionally, fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL;
 #' C = volume of Count culture used for dilution, in uL; and D = dilution factor. Note that D is
-#' expressed as an integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). Fraction is
+#' expressed as an integer (eg. \eqn{10^{3}}) and not a ratio (eg. \eqn{10^{-3}}). Fraction is
 #' calculated individually for every observation in the raw file.
 #'
 #' @import openxlsx dplyr
@@ -44,16 +44,8 @@
 #'
 #' @export
 
-wrangle_raw_data <- function(templateFile, exclude = NULL, fill = 60, dilution = 1e5,
-                             saveAs = NULL, overwrite = FALSE){
-  # ARGS:
-  # templateFile - The excel file (probably change this since it's not always a template)
-  # fill - Total number of "wells" to fill to; if NULL, does not fill
-  # exclude -
-  # dilution - what dilution to use for the Count populations, because it's not possible to
-  #                  aggregate over multiple dilutions without some kind of internal averaging
-
-  ###
+wrangle_raw_data <- function(templateFile, exclude = c("Example layout", "Column guide"),
+                             fill = 60, dilution = 1e5, saveAs = NULL, overwrite = FALSE){
 
   # Get the workbook
   sheetList <- openxlsx::getSheetNames(templateFile)
@@ -148,7 +140,7 @@ wrangle_raw_data <- function(templateFile, exclude = NULL, fill = 60, dilution =
   # Handle export filename
   if(is.null(saveAs)){
     # extract default basename & construct exportName
-    baseName <- sub(".xlsx$", "", basename(dataFile))
+    baseName <- sub(".xlsx$", "", basename(templateFile))
     exportName <- paste0(exportPath, "/", baseName)
   } else {
     # or construct using <saveAs> value
@@ -156,7 +148,7 @@ wrangle_raw_data <- function(templateFile, exclude = NULL, fill = 60, dilution =
   }
 
   # Write file and report
-  write.csv(allData, paste0(exportName, ".csv"), row.names = FALSE)
+  write.csv(exportData, paste0(exportName, ".csv"), row.names = FALSE)
   message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
 
 
@@ -264,7 +256,7 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
     validList <- csvList[which(!(csvList %in% pooledList) & !(csvList %in% unpooledList))]
 
     # Catch no valid files
-    if(length(validList == 0)){
+    if(length(validList) == 0){
       stop("No valid files to process. Note that pooled/unpooled file pairs are already processed.")
     }
 
@@ -278,7 +270,7 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
       # If headers are valid, wrangle & export
       if(all(headers %in% names(currentData))){
         message(paste0("Processing ", baseName))
-        do_clean_wrangle(currentData, baseName, poolAs, exclude, saveAs)
+        do_wrangle(currentData, baseName, poolAs, exclude, saveAs)
       }
     } # (no error message here because it's not the user's job to validate inputs?)
 
