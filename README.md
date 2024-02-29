@@ -18,7 +18,7 @@ Engelstaedter/Letten group - your mileage with other systems may vary.
 The package has slightly more functionality under the hood, so you
 should read the function documentation for more information.
 
-## Installation
+## Setup
 
 To install the package, run the following lines:
 
@@ -36,10 +36,10 @@ get_template("PATH")
 ```
 
 The first two sheets of the template are usage guides. Once you’ve read
-them, you can begin recording your data on the empty sheets. These are
-named “Replicate 1” and “Replicate 2”, but you can rename them as you
-please (e.g. to the date of the experiments), copying the format to
-additional sheets as needed.
+them, you can begin recording your data on the empty sheets. These
+sheets are named “Replicate 1” and “Replicate 2”, but you can rename
+them as you please (e.g. to the date of the experiments), copying the
+format to additional sheets as needed.
 
 ## Use
 
@@ -61,13 +61,13 @@ correct format. If your raw data is contained in the Excel workbook
 template, run:
 
 ``` r
-wrangle_raw_data(dataFile = "PATH", 
-                 countPops = 4)
+wrangle_raw_data("PATH")
 ```
 
-replacing PATH with the location of your Excel workbook. In this
-example, `countPops` is 4 because it’s the standard design described in
-the *A. baylyi* and *E. coli* protocols. If you aren’t using the
+replacing PATH with the location of your Excel workbook. By default,
+this assumes that (a) your *Count* populations were diluted
+1:10<sup>5</sup>; and (b) any *Selective* wells missing from the raw
+file were in fact plated but had no growth. If you aren’t using the
 standard design, and for more information on additional options, read
 the documentation by calling `?wrangle_raw_data`.
 
@@ -85,10 +85,10 @@ This produces a pair of CSV files, also in `output/wrangled/`: a
 an “unpooled” file, where each replicate is kept separate.
 
 If, for whatever reason, your data is not in the Excel template and is
-instead in a CSV file with the correct column names, you probably
-already have some experience with this pipeline. In this case, you
-should run `wrangle_clean_data()` but supply the file via the `dataFile`
-argument.
+instead already in the tidy CSV format with the correct column names,
+you probably already have some experience with this pipeline. In this
+case, you should run `wrangle_clean_data()` but supply the file via the
+`dataFile` argument.
 
 ### Part 2 - Analysis
 
@@ -135,7 +135,7 @@ the pipeline format.
 
 ### Pipeline mode
 
-When wrangling the raw files with `wrangle_raw_data()` or
+When wrangling raw files with `wrangle_raw_data()` or
 `wrangle_clean_data()`, multiple datasets can be wrangled and saved to
 the standard output folder `output/wrangled/`. Each file wrangled this
 way constitutes a “project”; by default the original filename is
@@ -145,8 +145,8 @@ it is. You can change the filename of the wrangled file using the
 `saveAs` argument in either of the `wrangle_` functions.
 
 In pipeline mode, `run_fluxxer()`, `plot_fluxxer()`, and
-`export_mutrates()` automatically processes the appropriate input files
-by project, meaning for example that the file pair
+`export_mutrates()` automatically process the appropriate input files by
+project, meaning for example that the file pair
 `fluctest1_unpooled.output.csv` and `fluctest1_pooled.output.csv` is
 understood to belong to the same dataset and are processed together.
 
