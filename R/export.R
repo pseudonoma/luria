@@ -193,31 +193,38 @@ extract_mutrates <- function(method = "save", overwrite = FALSE){
 
 #' Save a copy of the fluctuation analysis data template.
 #'
-#' This function saves to a particular location a copy of the Excel spreadsheet template for
-#' recording fluctuation analysis data .
+#' Use this function to save a copy of the fluctuation analysis Excel data template.
 #'
 #' @param saveTo Path to save the template file. Defaults to the project root.
 #' @param saveAs Filename to use. The default filename is "template.xlsx".
+#' @param version Which version of the template to use. Defaults to `latest`; `old` saves a copy of
+#' the old template - use this at your own risk.
 #'
 #' @examples
 #' get_template("./data", "my_data_template")
 #'
 #' @export
 
-get_template <- function(saveTo = ".", saveAs = "template"){
+get_template <- function(saveTo = ".", saveAs = "template", version = "latest"){
 
   # Doing this by reading in the file and saving it back out so I don't have to deal
   # with low-level file manipulation across Windows and UNIX. Fuck that shit.
 
   # Read the file in
-  wb <- openxlsx::loadWorkbook()
+  if(version == "latest"){
+    wb <- openxlsx::loadWorkbook(system.file("extdata", "fluctest_template.xlsx",
+                                             package = "luria"))
+  } else if(version == "old"){
+    wb <- openxlsx::loadWorkbook(system.file("extdata", "fluctest_template_old.xlsx",
+                                             package = "luria"))
+  }
 
   # Handle folders
-  dir.create("saveTo", recursive = TRUE)
+  dir.create(saveTo, recursive = TRUE)
 
-  # Save the back out
+  # Save the file back out
   openxlsx::saveWorkbook(wb, paste0(saveTo, "/", saveAs, ".xlsx"))
-  message(paste0("Data template saved to", saveTo))
+  message(paste0("Data template saved to ", saveTo))
 
 
   return(invisible())
