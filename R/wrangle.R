@@ -3,11 +3,23 @@
 #' Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
 #'
 #' @details
-#' This function converts raw data contained in an Excel workbook template into a standard CSV
-#' file with columns `strain`, `plate`, `fraction`, and `CFU`, which is required by downstream
-#' functions. The next function in the pipeline is [`wrangle_clean_data()`].
-#' ## Output CSV format
+#' This function converts raw data contained in an Excel workbook template into a standardized CSV
+#' file which is required by downstream functions. The next function in the pipeline is
+#' [`wrangle_clean_data()`].
 #'
+#' @section Output CSV format:
+#' The resulting CSV is a tidy table with four columns:
+#' \itemize{
+#'    \item `strain` - The name of the replicate
+#'    \item `plate` - The type of plate, either *Count* or *Selective*
+#'    \item `fraction` - The fraction of culture plated (see below)
+#'    \item `CFU` - The observed number of colonies on the plate.
+#' }
+
+#' Additionally, fraction is given as \eqn{F = P\div(CD)}, where P = volume plated, in uL;
+#' C = volume of Count culture used for dilution, in uL; and D = dilution factor. Note that D is
+#' expressed as an integer (eg. \eqn{10^{3}}) and **not** a ratio (eg. \eqn{10^{-3}}). Fraction is
+#' calculated individually for every observation in the raw file.
 #'
 #' @import openxlsx dplyr
 #'
@@ -21,7 +33,7 @@
 #' Defaults to `60`, the number of populations in a standard 96-well plate.
 #' @param dilution A *Count* population dilution factor to use for wrangling. The same factor will
 #' be used for all replicates.
-#' Defaults to `1e5`.
+#' Defaults to `1e5`, the standard dilution rate for the *A. baylyi* and *E. coli* protocols.
 #' @param saveAs A filename for saving the wrangled file.
 #' Defaults to `NULL`, in which case the original filename will be used.
 #'
@@ -161,8 +173,10 @@ wrangle_raw_data <- function(templateFile, exclude = NULL, fill = 60, dilution =
 #'
 #' @details
 #' This function produces two CSV files, one with all replicates pooled into one strain, and another
-#' CSV with the replicates kept separate. The output CSV has the columns `strain`, `plate`,
-#' `fraction`, and `CFU`, which is required by [`run_fluxxer()`], the next function in the pipeline.
+#' CSV with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
+#' which is required by [`run_fluxxer()`], the next function in the pipeline.
+#'
+#' @inheritSection wrangle_raw_data Output CSV format
 #'
 #' @inheritParams wrangle_raw_data
 #' @inheritParams prep_export
