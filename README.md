@@ -35,6 +35,12 @@ line, replacing PATH with the folder you want to save the file to:
 get_template("PATH")
 ```
 
+The first two sheets of the template are usage guides. Once you’ve read
+them, you can begin recording your data on the empty sheets. These are
+named “Replicate 1” and “Replicate 2”, but you can rename them as you
+please (e.g. to the date of the experiments), copying the format to
+additional sheets as needed.
+
 ## Use
 
 The pipeline is split into three sections: wrangling the raw data into a

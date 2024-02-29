@@ -28,7 +28,7 @@ in the wrapper function.}
 A dataframe of identical dimensions and headers as the input.
 }
 \description{
-This function is called by \code{\link[=wrangle_raw_data]{wrangle_raw_data()}} inside the by-sheet loop. It takes a fluxxer-
+This function is called by \code{\link[=wrangle_old_raws]{wrangle_old_raws()}} inside the by-sheet loop. It takes a fluxxer-
 formatted dataframe and uses the arguments to populate the rest of the rows, before returning
 the dataframe.
 }
