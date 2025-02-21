@@ -30,4 +30,4 @@ Imports:
     tibble,
     utils
 Remotes: 
-    github::eeeeeric/rSalvador/rsalvador
+    rsalvador=github::eeeeeric/rSalvador/rsalvador
