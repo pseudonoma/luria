@@ -1,6 +1,6 @@
 Package: luria
 Title: A Pipeline for Fluctuation Analysis
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: c(
     person("Ian", "Gooi", 
            email = "ian.gooi@uq.net.au", 
