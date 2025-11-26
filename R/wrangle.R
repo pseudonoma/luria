@@ -1,14 +1,13 @@
-#' Convert a fluctuation analysis Excel workbook.
+#' Process a luria template file
 #'
-#' Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
+#' Wrangle a standard fluctuation analysis Excel workbook template, converting it for the pipeline.
 #'
 #' @details
-#' This function converts raw data contained in an Excel workbook template into a standardized CSV
-#' file which is required by downstream functions. The next function in the pipeline is
-#' [`wrangle_clean_data()`].
+#' This function converts raw data contained in an Excel workbook template (obtained by running
+#' [`get_template()`]) into a standardized CSV file which is required for downstream processing.
 #'
-#' @section Output CSV format:
-#' The resulting CSV is a tidy table with four columns:
+#' @section Output data format:
+#' The output dataframe has four columns:
 #' \itemize{
 #'    \item `strain` - The name of the replicate
 #'    \item `plate` - The type of plate, either *Count* or *Selective*
@@ -25,7 +24,7 @@
 #'
 #' @inheritParams prep_export
 #' @param templateFile The filename of the standard Excel workbook.
-#' @param exclude A character vector of sheet names (e.g. replicates) to skip. By default the
+#' @param exclude.sheets A character vector of sheet names (e.g. replicates) to skip. By default the
 #' help sheets *Example layout* and *Column guide* is skipped, but more can be added.
 #' @param fill A number indicating the true number of populations (i.e. wells) in each replicate.
 #' Additional *Selective* populations will be added with 0 CFU, up to this number. If `NULL`, no
@@ -34,22 +33,38 @@
 #' @param dilution A *Count* population dilution factor to use for wrangling. The same factor will
 #' be used for all replicates.
 #' Defaults to `1e5`, the standard dilution rate for the *A. baylyi* and *E. coli* protocols.
-#' @param saveAs A filename for saving the wrangled file.
-#' Defaults to `NULL`, in which case the original filename will be used.
+#' @param export If `TRUE`, outputs will also be exported as a CSV.
+#' @param save.as If supplied, the exported file(s) will use this filename. Defaults to `NULL`, in
+#' which case the exported file will retain the filename from the input file.
+#' @param export.to Where to create the output folder and export the CSV.
+#' Defaults to the current directory.
 #'
 #' @examples
 #' wrangle_raw_data(templateFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
-#'                  exclude = c("Rep 0", "Rep 13"),
-#'                  saveAs = "RIF_Aug2023")
+#'                  exclude.sheets = c("Rep 0", "Rep 13"),
+#'                  save.as = "RIF_Aug2023")
+#'
+#' @return A dataframe with columns `strain`, `plate`, `fraction`, and `CFU`.
 #'
 #' @export
 
-wrangle_raw_data <- function(templateFile, exclude = c("Example layout", "Column guide"),
-                             fill = 60, dilution = 1e5, saveAs = NULL, overwrite = FALSE){
+wrangle_raw_data <- function(templateFile, exclude.sheets = c("Example layout", "Column guide"),
+                             fill = 60, dilution = 1e5,
+                             export = FALSE, overwrite = FALSE, save.as = NULL, export.to = "."){
+
+  # ### DEBUG ###
+  # templateFile <- dataPath
+  # exclude.sheets <- c("Example layout", "Column guide")
+  # fill <- 60
+  # dilution <- 1e5
+  # export <- TRUE
+  # overwrite <- FALSE
+  # save.as <- NULL
+  # export.to <- "."
 
   # Get the workbook
   sheetList <- openxlsx::getSheetNames(templateFile)
-  sheetList <- sheetList[!sheetList %in% exclude]
+  sheetList <- sheetList[!sheetList %in% exclude.sheets]
 
   # Make overall dataframe object
   exportData <- data.frame()
@@ -71,11 +86,16 @@ wrangle_raw_data <- function(templateFile, exclude = c("Example layout", "Column
     # Summarize Count data and collapse CFUs
     currentCounts <-
       currentCounts |>
-      filter(Dilution.factor == dilution) |>
+      dplyr::filter(Dilution.factor == dilution) |>
       dplyr::group_by(Name, Type, Well, Volume.taken, Volume.plated,
                       Dilution.factor) |>
       dplyr::summarize(CFU = mean(CFU.observed)) |>
       dplyr::ungroup()
+
+    # Catch no Count data (most likely due to incorrect dilution provided)
+    if(nrow(currentCounts) == 0){
+      stop("No valid Count populations after filtering: did you specify the correct dilution?")
+    }
 
     # Handle autofill and current df rowcount
     countLength <- nrow(currentCounts)
@@ -134,157 +154,157 @@ wrangle_raw_data <- function(templateFile, exclude = c("Example layout", "Column
 
   }
 
-  # Handle exporting using export helper function
-  exportPath <- prep_export(mode = "wrangled", overwrite)
+  # Export as CSV
+  if(export){
 
-  # Handle export filename
-  if(is.null(saveAs)){
-    # extract default basename & construct exportName
-    baseName <- sub(".xlsx$", "", basename(templateFile))
-    exportName <- paste0(exportPath, "/", baseName)
-  } else {
-    # or construct using <saveAs> value
-    exportName <- paste0(exportPath, "/", saveAs)
+    # Handle exporting using export helper function
+    exportPath <- prep_export(mode = "wrangled", overwrite = overwrite, outputParent = export.to)
+
+    # # Extract default basename & construct exportName
+    # baseName <- sub(".xlsx$", "", basename(templateFile))
+    # exportName <- paste0(exportPath, "/", baseName)
+
+    # Construct filename
+    if(!is.null(save.as)){ # save.as supercedes all other names
+      exportName <- paste0(exportPath, "/", save.as)
+    } else if(is.null(save.as)){ # no save.as; must parse or construct default
+      baseName <- sub(".xlsx$", "", basename(templateFile))
+      exportName <- paste0(exportPath, "/", baseName)
+      # if(exists(baseName, inherits = FALSE)){
+      #   baserName <- sub(".csv", "", baseName)
+      #   exportName <- paste0(exportPath, "/", baserName)
+      # } else {
+      #   timestamp <- paste0(format(Sys.Date(), "%y%m%d"), "-", format(Sys.time(), "%H%M"))
+      #   exportName <- paste0(exportPath, "/", timestamp)
+      #   warning("Input data has no filename, used current date-time as filename instead.")
+      # }
+    }
+
+    # Write file and report
+    write.csv(exportData, paste0(exportName, ".csv"), row.names = FALSE)
+    message("Done. Check luria_output/wrangled/ for the wrangled .csv files.\n")
   }
 
-  # Write file and report
-  write.csv(exportData, paste0(exportName, ".csv"), row.names = FALSE)
-  message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
 
-
-  return(invisible())
+  return(exportData)
 
 }
 
 
-#' Create standardized pooled and unpooled data files for the pipeline.
+#' Create standardized pooled and unpooled data files for the pipeline
 #'
 #' Prepare CSV files previously wrangled by [`wrangle_raw_data()`] for the rest of the
 #' pipeline. Correctly-formatted CSVs otherwise created (e.g. if the Excel template was not
 #' used) can also be prepared for the pipeline with this function.
 #'
 #' @details
-#' This function produces two CSV files, one with all replicates pooled into one strain, and another
-#' CSV with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
-#' which is required by [`run_fluxxer()`], the next function in the pipeline.
+#' This function produces two data frames, one with all replicates pooled into one strain, and
+#' another with the replicates kept separate. Both CSV files are tidy tables in a standardized
+#' format, which is required by [`run_fluxxer()`], the next function in the pipeline.
 #'
-#' @inheritSection wrangle_raw_data Output CSV format
+#' @inheritSection wrangle_raw_data Output data format
 #'
 #' @inheritParams wrangle_raw_data
 #' @inheritParams prep_export
-#' @param dataFile A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
-#' @param poolAs What the pooled strain should be named.
-#' Defaults to `NULL`, in which case the strain is just named *Combined*.
-#' @param exclude A character vector of replicates to skip.
+#' @param inputData A CSV file with the standard headers `strain`, `plate`, `fraction`, and `CFU`.
+#' Alternatively, a dataframe with those headers.
+#' @param pool.as What the pooled strain should be named. If `NULL` (the default), the strain is
+#' named *Combined*.
+#' @param exclude.reps A character vector of replicates to skip.
 #'
 #' @examples
-#' wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
-#'                    poolAs = "AB3",
-#'                    exclude = c("Rep 0", "Rep 13"),
+#' wrangle_clean_data(inputData = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+#'                    pool.as = "AB3",
+#'                    exclude.reps = c("Rep 0", "Rep 13"),
 #'                    saveAs = "RIF_Aug2023")
 #' @return
-#' Two tidy CSVs with columns `strain`, `plate`, `fraction`, and `CFU`.
+#' A list of two dataframes named `pooledData` and `unpooledData`, with columns `strain`, `plate`,
+#' `fraction`, and `CFU`.
 #'
 #' @export
 
-wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
-                               saveAs = NULL, overwrite = FALSE){
+wrangle_clean_data <- function(inputData, pool.as = NULL, exclude.reps = NULL,
+                               export = FALSE, overwrite = FALSE, save.as = NULL, export.to = "."){
 
-  # Explicitly set mode
-  runMode <- ifelse(is.null(dataFile), yes = "standard", no = "single")
+  # ### DEBUG ###
+  # inputData <- "./luria_output/wrangled/alicia_test.csv"
 
-  # Handle export pathing
-  exportPath <- prep_export(mode = "wrangled", overwrite)
+  # is the input an object already, or a filename?
+  if(is.data.frame(inputData)){
+    data <- inputData
+  } else if(is.character(inputData)){
+    # NTS: CAUTION if file isn't a CSV there's no catcher for it
+    data <- read.csv(inputData)
+    baseName <- basename(inputData)
+  } else {
+    stop("input must be either a dataframe object or CSV file.")
+  }
 
-  # Define standard header for checks
+  # Check headers and wrangle
   headers <- c("strain", "plate", "fraction", "CFU")
-
-  ### Define wrangle-export subroutine #####
-  do_wrangle <- function(data, baseName, poolAs, exclude, saveAs){
-
-    # Crudely read in pooled/unpooled data, sans excluded strains
-    pooledData <- data[!(data$strain %in% exclude), ]
-    unpooledData <- data[!(data$strain %in% exclude), ]
-    if(is.null(poolAs)){
+  if(all(headers %in% names(data))){
+    # (Crudely) separate data into pooled/unpooled dfs, sans excluded strains
+    # NTS: used to be part of subfunction do_wrangle()
+    pooledData <- data[!(data$strain %in% exclude.reps), ]
+    unpooledData <- data[!(data$strain %in% exclude.reps), ]
+    if(is.null(pool.as)){ # optional user-defined name for pooled data
       pooledData$strain <- "Combined"
     } else {
-      pooledData$strain <- poolAs
+      pooledData$strain <- pool.as
     }
+  } else {
+    # if headers invalid it mustn't proceed
+    stop("The required columns are missing or incorrectly named. Check the file and try again.")
+  }
 
-    # Construct export filename
-    if(is.null(saveAs)){
-      # extract basename & construct exportName
-      baserName <- sub(".csv", "", baseName)
-      exportName <- paste0(exportPath, "/", baserName)
-    } else {
-      # or construct using <saveAs> value
-      exportName <- paste0(exportPath, "/", saveAs)
+  # Export as CSV
+  if(export){
+
+    # Handle export pathing
+    exportPath <- prep_export(mode = "wrangled", outputParent = export.to, overwrite)
+
+    # # Construct export filename based on whether basename exists
+    # if(exists(baseName, inherits = FALSE)){
+    #   # extract basename & construct exportName
+    #   baserName <- sub(".csv", "", baseName)
+    #   exportName <- paste0(exportPath, "/", baserName)
+    # } else if (!exists(baseName, inherits = FALSE)){
+    #   timestamp <- paste0(format(Sys.Date(), "%y%m%d"), "-", format(Sys.time(), "%H%M"))
+    #   exportName <- paste0(exportPath, "/", timestamp)
+    #   warning("Input data has no filename, used current date-time as filename instead.")
+    # }
+
+    # Construct filename
+    if(!is.null(save.as)){ # save.as supercedes all other names
+      exportName <- paste0(exportPath, "/", save.as)
+    } else if(is.null(save.as)){ # no save.as; must parse or construct default
+      if(exists("baseName", inherits = FALSE)){
+        baserName <- sub(".csv", "", baseName)
+        exportName <- paste0(exportPath, "/", baserName)
+      } else {
+        timestamp <- paste0(format(Sys.Date(), "%y%m%d"), "-", format(Sys.time(), "%H%M"))
+        exportName <- paste0(exportPath, "/", timestamp)
+        warning("Input data has no filename, used current date-time as filename instead.")
+      }
     }
 
     # Export
     write.csv(unpooledData, paste0(exportName, "_unpooled.csv"), row.names = FALSE)
     write.csv(pooledData, paste0(exportName, "_pooled.csv"), row.names = FALSE)
 
-  } ### end do_wrangle() #####
-
-  # Begin wrangle
-
-  ##### Single-file mode #####
-  if(runMode == "single"){
-
-    # Read in file
-    data <- read.csv(dataFile)
-    baseName <- basename(dataFile)
-
-    # If headers are valid, wrangle & export
-    if(all(headers %in% names(data))){
-      do_wrangle(data, baseName, poolAs, exclude, saveAs)
-    } else {
-      # headers appear invalid
-      stop("The required columns are missing or incorrectly named. Check your file and try again.")
-    }
-
-    ##### Standard pipeline mode #####
-  } else if(runMode == "standard"){
-
-    # Get CSVs from the standard input location...
-    inputPath <- "./output/wrangled"
-    csvList <- grep(".csv$", dir(inputPath, full.names = TRUE), value = TRUE)
-    # ...and grab only CSVs which don't look like pipeline files (in case overwrite = T)
-    pooledList <- grep("_pooled.csv$", dir(inputPath, full.names = TRUE), value = TRUE)
-    unpooledList <- grep("_unpooled.csv$", dir(inputPath, full.names = TRUE), value = TRUE)
-    validList <- csvList[which(!(csvList %in% pooledList) & !(csvList %in% unpooledList))]
-
-    # Catch no valid files
-    if(length(validList) == 0){
-      stop("No valid files to process. Note that pooled/unpooled file pairs are already processed.")
-    }
-
-    # Loop over valid, non-pipeline CSVs
-    for(file in validList){
-
-      # Read in files just like single-mode
-      currentData <- read.csv(file)
-      baseName <- basename(file)
-
-      # If headers are valid, wrangle & export
-      if(all(headers %in% names(currentData))){
-        message(paste0("Processing ", baseName))
-        do_wrangle(currentData, baseName, poolAs, exclude, saveAs)
-      }
-    } # (no error message here because it's not the user's job to validate inputs?)
-
+    message("Done. Check luria_output/wrangled/ for the wrangled .csv files.\n")
   }
 
-  message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
+  # construct return object
+  exportObject <- list("pooledData" = pooledData, "unpooledData" = unpooledData)
 
 
-  return(invisible())
+  return(exportObject)
 
 }
 
 
-#' Wrangle fluxxer outputs for plotting.
+#' Wrangle fluxxer outputs for plotting
 #'
 #' Internal function called by [`plot_fluxxer()`]. It imports and wrangles analyzed data to prepare
 #' it for plotting.
@@ -315,16 +335,14 @@ wrangle_clean_data <- function(dataFile = NULL, poolAs = NULL, exclude = NULL,
 
 wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL){
 
-  # Detect mode
-  if(!is.null(file) & is.null(projectName)){
+  # Set mode
+  # NTS: internal function, stop adding overwrought error catchers
+  if(!is.null(file)){
     runMode <- "single"
-  } else if(is.null(file) & !is.null(projectName)){
-    runMode <- "standard"
-    if(is.null(inputPath)){
-      stop(paste0("projectName supplied without inputPath. Please report this bug."))
-    }
+  } else if(!is.null(projectName) & !is.null(inputPath)){
+    runMode <- "project"
   } else {
-    stop("That's odd, file XOR project should be NULL. Please report this bug.")
+    stop("Looks like a bug in mode detection. Please report this.")
   }
 
   # Begin wrangle
@@ -340,7 +358,7 @@ wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL)
     # Construct export object
     exportObject <- list("data" = singleData, "levels" = goodOrder, "log" = logMode)
 
-  } else if(runMode == "standard"){
+  } else if(runMode == "project"){
 
     # Import data and combine
     unpooledData <- read.csv(paste0(inputPath, "/", projectName, "_unpooled.output.csv"), header = T)
@@ -365,7 +383,7 @@ wrangle_plot_data <- function(file = NULL, projectName = NULL, inputPath = NULL)
 }
 
 
-#' (Legacy) Convert a fluctuation analysis Excel workbook.
+#' (Legacy) Convert a fluctuation analysis Excel workbook
 #'
 #' Wrangle a legacy-format standard fluctuation analysis Excel workbook, converting it for the
 #' pipeline.
@@ -427,10 +445,10 @@ wrangle_old_raws <- function(dataFile, countPops, countFract = c(P = 200, C = 20
     currentCounts$mean <- rowMeans(currentCounts, na.rm = TRUE) # compute count plate means
 
     # # prep the two streams of current dfs
-    # if(is.null(poolAs)){
+    # if(is.null(pool.as)){
     #   poolStrain <- "Combined"
     # } else {
-    #   poolStrain <- poolAs
+    #   poolStrain <- pool.as
     # }
     # unpooledData <- data.frame(strain = rep(sheet, nrow(currentCounts) + (60 - countPops)),
     #                            plate = NA, fraction = NA, CFU = NA)
@@ -465,7 +483,7 @@ wrangle_old_raws <- function(dataFile, countPops, countFract = c(P = 200, C = 20
 
   # Write file and report
   write.csv(allData, paste0(exportName, ".csv"), row.names = FALSE)
-  message("\nDone. Check output/wrangled/ for the wrangled .csv files.\n")
+  message("\nDone. Check luria_output/wrangled/ for the wrangled .csv files.\n")
 
 
   return(invisible())
