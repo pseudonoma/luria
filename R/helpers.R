@@ -1,4 +1,4 @@
-#' Helper function for converting sheet data.
+#' Helper function for converting sheet data
 #'
 #' This function is called by [`wrangle_old_raws()`] inside the by-sheet loop. It takes a fluxxer-
 #' formatted dataframe and uses the arguments to populate the rest of the rows, before returning
@@ -48,7 +48,7 @@ populate_rows <- function(currentData, currentCounts, currentMutants, countFract
 }
 
 
-#' Helper function for reordering replicate names.
+#' Helper function for reordering replicate names
 #'
 #' This function is called by [`wrangle_plot_data()`]. It assumes that each unpooled replicate is
 #' named in the format `<rep><number>`, where `<rep>` can be any string, with or without spaces, as
@@ -85,7 +85,7 @@ refactor_reps <- function(data, pooledPrefix = NULL){
 }
 
 
-#' Helper function to check for the annotation_logticks error.
+#' Helper function to check for the annotation_logticks error
 #'
 #' This function is called by [`wrangle_plot_data()`], and exists because because
 #' `ggplot2::annotation_logticks` shits itself if the upper and lower CI differs by less than one
@@ -121,11 +121,11 @@ test_logticks <- function(data){
 }
 
 
-#' Helper function for setting up and checking folder structure and pathing.
+#' Helper function for setting up and checking folder structure and pathing
 #'
 #' This function is called by all frontend functions that produce file outputs, namely
 #' [`wrangle_raw_data()`], [`wrangle_clean_data()`], [`run_fluxxer()`], and [`plot_fluxxer()`].
-#' It always attempts to create the top-level output folder `./output/` whenever it's called,
+#' It always attempts to create the top-level output folder `/luria_output/` whenever it's called,
 #' and enforces output folder structure by (a) checking if the output subfolder exists and if
 #' its contents can be overwritten, and (b) returning the output path for use by the calling
 #' function so it only has to be defined once. `overwrite` is determined by the user in the
@@ -134,6 +134,8 @@ test_logticks <- function(data){
 #'
 #' @param mode Defined by the calling function to determine what output folder is appropriate and
 #' how to handle it. Takes values `"wrangled"`, `"analyzed"`, `"plots"`, or `"mutrates"`.
+#' @param outputParent Top directory to create the output folders in. Must be supplied by the
+#' calling functions, but should usually default to the current directory.
 #' @param overwrite If `TRUE`, output file(s) will be saved to the appropriate folder whether or not
 #' existing file(s) are replaced.
 #' Defaults to `FALSE`.
@@ -143,13 +145,13 @@ test_logticks <- function(data){
 #'
 #' @keywords internal
 
-prep_export <- function(mode = NULL, overwrite = FALSE){
+prep_export <- function(mode = NULL, outputParent, overwrite = FALSE){
 
   # Define top-level path
-  outputParent <- "./output"
-  if(!dir.exists(outputParent)){
-    dir.create(outputParent, showWarnings = FALSE)
-    message("Creating folder ./output/ for results.")
+  outputFolder <- paste0(outputParent, "/luria_output")
+  if(!dir.exists(outputFolder)){
+    dir.create(outputFolder, showWarnings = FALSE)
+    message(paste("Creating folder", outputFolder, "for results."))
   }
 
   # Report overwrite state
@@ -160,7 +162,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
 
   # Handle particular export requirements & path structure
   if(mode == "wrangled"){
-    wrangledPath <- paste0(outputParent, "/wrangled")
+    wrangledPath <- paste0(outputFolder, "/wrangled")
     if(isFALSE(overwrite)){ # if do not overwrite
       if(length(dir(wrangledPath)) > 0){ # and output folder has files
         hasCleanFiles <- any(grepl("_pooled.csv$", dir(wrangledPath)) |
@@ -170,33 +172,33 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
       }
       if(hasCleanFiles){ # are any of the files pipeline files?
         # if yes, then we do not want to overwrite pipeline files at this time.
-        stop("output/wrangled/ has pipeline files in it! Delete or move the folder and try again.")
+        stop("luria_output/wrangled/ has pipeline files in it! Move them or set overwrite = TRUE.")
       }
     }
     dir.create(wrangledPath, showWarnings = FALSE)
     outputPath <- wrangledPath
 
   } else if(mode == "analyzed"){
-    analyzedPath <- paste0(outputParent, "/analyzed")
+    analyzedPath <- paste0(outputFolder, "/analyzed")
     if((length(dir(analyzedPath)) > 0) & isFALSE(overwrite)){
-      stop("output/analyzed/ has files in it! Delete or move the folder and try again.")
+      stop("luria_output/analyzed/ has files in it! Move them or set overwrite = TRUE.")
     }
     dir.create(analyzedPath, showWarnings = FALSE)
     outputPath <- analyzedPath
 
   } else if(mode == "plots"){
-    plotsPath <- paste0(outputParent, "/analyzed") # pops it back into the same folder
+    plotsPath <- paste0(outputFolder, "/analyzed") # pops it back into the same folder
     hasPlots <- grepl("^plot_", dir(plotsPath))
     if(any(hasPlots) & isFALSE(overwrite)){
-      stop("output/analyzed/ has plots in it! Delete or move the folder and try again.")
+      stop("luria_output/analyzed/ has plots in it! Move them or set overwrite = TRUE.")
     }
     outputPath <- plotsPath
 
   } else if(mode == "mutrates"){
-    mutsPath <- paste0(outputParent, "/analyzed")
+    mutsPath <- paste0(outputFolder, "/analyzed")
     hasMuts <- grepl("^mutrate_", dir(mutsPath))
     if(any(hasMuts) & isFALSE(overwrite)){
-      stop("output/analyzed/ has a mutation rate file in it! Delete or move the folder and try again.")
+      stop("luria_output/analyzed/ has mutation rate files in it! Move them or set overwrite = TRUE.")
     }
     outputPath <- mutsPath
 
@@ -210,7 +212,7 @@ prep_export <- function(mode = NULL, overwrite = FALSE){
 }
 
 
-#' Helper function saving mutation rate plots.
+#' Helper function for saving mutation rate plots
 #'
 #' This function is called by [`plot_fluxxer()`]. All it does is save a plot in PNG and PDF
 #' format in "postcard" dimensions (6" x 8") to the specified output folder.
