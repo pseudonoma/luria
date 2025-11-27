@@ -2,34 +2,48 @@
 % Please edit documentation in R/analyze.R
 \name{run_fluxxer}
 \alias{run_fluxxer}
-\title{Analyze the data and estimate mutation rates.}
+\title{Analyze the data and estimate mutation rates}
 \usage{
-run_fluxxer(file = NULL, comparisons = TRUE, overwrite = FALSE)
+run_fluxxer(
+  inputData,
+  comparisons = TRUE,
+  overwrite = FALSE,
+  save.as = NULL,
+  export.to = "."
+)
 }
 \arguments{
-\item{file}{The filename of a correctly-formatted CSV file to estimate mutation rates from.
-Supplying this will cause the function to run in single-file mode.}
+\item{inputData}{A correctly-formatted dataframe, or a list containing a pair of such produced
+by \code{\link[=wrangle_clean_data]{wrangle_clean_data()}}, to estimate mutation rates from. Alternatively, a well-formed CSV
+file, or a folder containing pairs of pooled/unpooled data CSVs.}
 
-\item{comparisons}{Logical value indicating if a comparison file should be generated. If \code{file}
-is also supplied, the function will generate a comparison even if only one strain is available.}
+\item{comparisons}{Logical value indicating if a comparison file should be generated.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
 Defaults to \code{FALSE}.}
+
+\item{save.as}{If supplied, the exported file(s) will use this filename. Defaults to \code{NULL}, in
+which case the exported file will retain the filename from the input file.}
+
+\item{export.to}{Where to create the output folder and export the CSV.
+Defaults to the current directory.}
 }
 \description{
-Estimate mutation rates from wrangled fluctuation analysis data, using an individual file or
-as the next step in the pipeline, and output them as CSV files.
+Estimate mutation rates using the wrangled fluctuation analysis data produced by
+\code{\link[=wrangle_clean_data]{wrangle_clean_data()}} and export the results.
 }
 \details{
-This function calls \code{\link[=calculate_mut_rate]{calculate_mut_rate()}} to estimate mutation rates. It can run on a single
-file, or cycle automatically through all files saved to \verb{./output/wrangled/} by the previous step
-in the pipeline. For every input file, a matching output file ending in \code{.output.csv} will be
-saved to \code{./output/analyzed}. If \code{comparisons} is \code{TRUE}, an additional file will be generated
-ending in \code{.comparisons.csv}; this file contains pairwise comparisons between all replicates and
-p-values indicating how different the mutation rates are from each other. Supplying the \code{file}
-argument runs this function in single-file mode. In standard pipeline mode, comparisons are only
-made using unpooled data.
+This function calls \code{\link[=calculate_mut_rate]{calculate_mut_rate()}} to estimate mutation rates. It can be supplied the
+list object produced by \code{\link[=wrangle_clean_data]{wrangle_clean_data()}}, a directory containing pooled/unpooled CSV file
+pairs, or else a single dataframe or file produced by the same method. Every file or dataframe
+will produce a corresponding output file named \verb{*.output.csv} saved to \verb{/luria_output/analyzed/}.
+
+If \code{comparisons = TRUE}, an additional file named \verb{*.comparisons.csv} will be generated; this
+file contains pairwise comparisons between all replicates and p-values indicating how different
+the mutation rates are from each other. Where pooled/unpooled data pairs are supplied, comparison
+files are generated from unpooled data. Note that supplying a single dataframe or file with
+\code{comparisons = TRUE} will generate a comparisons file even if the data has only one strain.
 }
 \examples{
 run_fluxxer(comparisons = TRUE)

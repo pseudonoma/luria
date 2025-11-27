@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrangle.R
 \name{wrangle_old_raws}
 \alias{wrangle_old_raws}
-\title{(Legacy) Convert a fluctuation analysis Excel workbook.}
+\title{(Legacy) Convert a fluctuation analysis Excel workbook}
 \usage{
 wrangle_old_raws(
   dataFile,

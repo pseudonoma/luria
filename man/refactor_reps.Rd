@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{refactor_reps}
 \alias{refactor_reps}
-\title{Helper function for reordering replicate names.}
+\title{Helper function for reordering replicate names}
 \usage{
 refactor_reps(data, pooledPrefix = NULL)
 }

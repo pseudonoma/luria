@@ -2,17 +2,18 @@
 % Please edit documentation in R/analyze.R
 \name{calculate_mut_rate}
 \alias{calculate_mut_rate}
-\title{Calculate mutation rates.}
+\title{Calculate mutation rates}
 \usage{
 calculate_mut_rate(
-  filename = NULL,
+  inputData,
   outputPath,
   outputPrefix = "",
   comparisons = FALSE
 )
 }
 \arguments{
-\item{filename}{A correctly-formatted CSV to estimate mutation rates from.}
+\item{inputData}{Input data. If a filename, must be a correctly-formatted CSV to estimate
+mutation rates from.}
 
 \item{outputPath}{The directory to save output files to.}
 

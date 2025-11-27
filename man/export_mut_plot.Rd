@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{export_mut_plot}
 \alias{export_mut_plot}
-\title{Helper function saving mutation rate plots.}
+\title{Helper function saving mutation rate plots}
 \usage{
 export_mut_plot(plot, prefix, outputPath)
 }

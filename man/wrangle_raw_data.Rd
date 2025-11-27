@@ -2,21 +2,23 @@
 % Please edit documentation in R/wrangle.R
 \name{wrangle_raw_data}
 \alias{wrangle_raw_data}
-\title{Convert a fluctuation analysis Excel workbook.}
+\title{Process a luria template file}
 \usage{
 wrangle_raw_data(
   templateFile,
-  exclude = c("Example layout", "Column guide"),
+  exclude.sheets = c("Example layout", "Column guide"),
   fill = 60,
   dilution = 1e+05,
-  saveAs = NULL,
-  overwrite = FALSE
+  export = FALSE,
+  overwrite = FALSE,
+  save.as = NULL,
+  export.to = "."
 )
 }
 \arguments{
 \item{templateFile}{The filename of the standard Excel workbook.}
 
-\item{exclude}{A character vector of sheet names (e.g. replicates) to skip. By default the
+\item{exclude.sheets}{A character vector of sheet names (e.g. replicates) to skip. By default the
 help sheets \emph{Example layout} and \emph{Column guide} is skipped, but more can be added.}
 
 \item{fill}{A number indicating the true number of populations (i.e. wells) in each replicate.
@@ -28,20 +30,27 @@ Defaults to \code{60}, the number of populations in a standard 96-well plate.}
 be used for all replicates.
 Defaults to \code{1e5}, the standard dilution rate for the \emph{A. baylyi} and \emph{E. coli} protocols.}
 
-\item{saveAs}{A filename for saving the wrangled file.
-Defaults to \code{NULL}, in which case the original filename will be used.}
+\item{export}{If \code{TRUE}, outputs will also be exported as a CSV.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
 Defaults to \code{FALSE}.}
+
+\item{save.as}{If supplied, the exported file(s) will use this filename. Defaults to \code{NULL}, in
+which case the exported file will retain the filename from the input file.}
+
+\item{export.to}{Where to create the output folder and export the CSV.
+Defaults to the current directory.}
+}
+\value{
+A dataframe with columns \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}.
 }
 \description{
-Wrangle a standard fluctuation analysis Excel workbook, converting it for the pipeline.
+Wrangle a standard fluctuation analysis Excel workbook template, converting it for the pipeline.
 }
 \details{
-This function converts raw data contained in an Excel workbook template into a standardized CSV
-file which is required by downstream functions. The next function in the pipeline is
-\code{\link[=wrangle_clean_data]{wrangle_clean_data()}}.
+This function converts raw data contained in an Excel workbook template (obtained by running
+\code{\link[=get_template]{get_template()}}) into a standardized CSV file which is required for downstream processing.
 }
 \section{Output CSV format}{
 
@@ -60,7 +69,7 @@ calculated individually for every observation in the raw file.
 
 \examples{
 wrangle_raw_data(templateFile = "./data/raws/FLUCTEST 1 2020 09 24.xlsx",
-                 exclude = c("Rep 0", "Rep 13"),
-                 saveAs = "RIF_Aug2023")
+                 exclude.sheets = c("Rep 0", "Rep 13"),
+                 save.as = "RIF_Aug2023")
 
 }

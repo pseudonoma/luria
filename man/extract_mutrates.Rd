@@ -2,32 +2,39 @@
 % Please edit documentation in R/export.R
 \name{extract_mutrates}
 \alias{extract_mutrates}
-\title{Extract mutation rates in a reproducible manner.}
+\title{Extract mutation rates in a reproducible manner}
 \usage{
-extract_mutrates(method = "save", overwrite = FALSE)
+extract_mutrates(
+  dataPath,
+  export.method = "all",
+  overwrite = FALSE,
+  export.to = "."
+)
 }
 \arguments{
-\item{method}{Takes value \code{"save"}, which exports the data as an RData object; \code{"return"}, which
-returns the mutation rate as an RData object; or \code{"both"}, which does both.}
+\item{dataPath}{Path to a folder containing pooled mutation rates to extract.}
+
+\item{export.method}{Takes value \code{"csv"}, which exports the data as a CSV, \code{"data"}, which
+exports the data as an RData object; or \code{"all"}, which exports all formats.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
 Defaults to \code{FALSE}.}
 }
 \value{
-If \code{method} is \code{"return"} or \code{"both"}, a numeric vector with elements named by project.
+A numeric vector with elements named by project.
 }
 \description{
-Automatically get mutation rates from output data and save it as an RData object.
+Automatically get mutation rates from output data and save it.
 }
 \details{
-This function was originally designed to quickly export pooled mutation rate estimates for
-simulation work, making it easier to track estimate versions and removing the need for copy +
-pasting. It is likely only useful if you have multiple projects to extract numbers from.
-This function does not take single files, as it really only makes sense to take the pooled
-estimate anyway.
+Extracts pooled mutation rate estimates from multiple projects of pooled/unpooled file pairs
+into a vector named by project, and exports them as a CSV of project name and estimates, and/or
+an RData file. Likely only useful for extracting mutation rates from multiple projects at once.
+This function does not take single files, and specifically looks for pooled estimate data as it
+really only makes sense to use those.
 }
 \examples{
-mutrates <- extract_mutrates(method = "both")
+mutrates <- extract_mutrates(export.method = "all")
 
 }

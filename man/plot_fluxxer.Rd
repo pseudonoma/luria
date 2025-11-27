@@ -2,36 +2,37 @@
 % Please edit documentation in R/export.R
 \name{plot_fluxxer}
 \alias{plot_fluxxer}
-\title{Plot mutation rate data.}
+\title{Plot mutation rate data}
 \usage{
-plot_fluxxer(file = NULL, return.plots = FALSE, overwrite = FALSE)
+plot_fluxxer(dataPath, export = TRUE, overwrite = TRUE, export.to = ".")
 }
 \arguments{
-\item{file}{The filename of an output file to plot mutation rates from.}
+\item{dataPath}{A path to an output CSV file to plot mutation rates from. Alternatively, a folder
+path containing pooled/unpooled file pairs.}
 
-\item{return.plots}{Logical. If \code{TRUE}, the plot is returned. This is useful if you would like to
-add further ggplot2 aesthetics, or display the plot in RStudio.}
+\item{export}{If \code{TRUE}, plots are exported as PDF and PNG files.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
 Defaults to \code{FALSE}.}
 }
 \value{
-If \code{return.plots} is \code{TRUE}, either a single \code{ggplot2} object (in single-file mode), or a list
-of \code{ggplot2} objects, each corresponding to a pair of pooled and unpooled input data.
+A single \code{ggplot2} object, or a list of \code{ggplot2} objects, each one corresponding to a pair of
+pooled and unpooled input data.
 }
 \description{
 Produce a dot plot of estimated mutation rates, with error bars representing upper and lower
 95\% confidence intervals.
 }
 \details{
-Like \code{\link[=run_fluxxer]{run_fluxxer()}}, supplying the \code{file} argument will cause this function to run in single-
-file mode, plotting the data as-is. Otherwise, it will automatically read through the pipeline
-folder \code{./output/analyzed} and combine pairs of pooled and unpooled data into individual plots.
-Plots are saved as 6 inch by 8 inch images, in both PNG and PDF format, to \code{./output/analyzed}.
+This function can be supplied either a single CSV file produced by \code{\link[=run_fluxxer]{run_fluxxer()}} or a folder
+of pooled/unpooled CSVs produced by that method. In the latter case, matching pooled and unpooled
+data will be combined into a single plot showing the mutation rates pooled and by strain. Plots
+are saved as 6 inch by 8 inch images, in both PNG and PDF format, to \verb{/luria_output/analyzed/}.
+Note that this function does not take dataframes.
 }
 \examples{
-plot <- plot_fluxxer(file = "./data/analyzed/wrangled.output.csv",
+plot <- plot_fluxxer(dataPath = "./data/analyzed/wrangled.output.csv",
                      return.plots = TRUE,
                      overwrite = TRUE)
 

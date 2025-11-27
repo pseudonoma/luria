@@ -2,7 +2,7 @@
 % Please edit documentation in R/wrangle.R
 \name{wrangle_plot_data}
 \alias{wrangle_plot_data}
-\title{Wrangle fluxxer outputs for plotting.}
+\title{Wrangle fluxxer outputs for plotting}
 \usage{
 wrangle_plot_data(file = NULL, projectName = NULL, inputPath = NULL)
 }

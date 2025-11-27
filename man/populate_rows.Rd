@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{populate_rows}
 \alias{populate_rows}
-\title{Helper function for converting sheet data.}
+\title{Helper function for converting sheet data}
 \usage{
 populate_rows(
   currentData,

@@ -2,33 +2,42 @@
 % Please edit documentation in R/wrangle.R
 \name{wrangle_clean_data}
 \alias{wrangle_clean_data}
-\title{Create standardized pooled and unpooled data files for the pipeline.}
+\title{Create standardized pooled and unpooled data files for the pipeline}
 \usage{
 wrangle_clean_data(
-  dataFile = NULL,
-  poolAs = NULL,
-  exclude = NULL,
-  saveAs = NULL,
-  overwrite = FALSE
+  inputData,
+  pool.as = NULL,
+  exclude.reps = NULL,
+  export = FALSE,
+  overwrite = FALSE,
+  save.as = NULL,
+  export.to = "."
 )
 }
 \arguments{
-\item{dataFile}{A CSV file with the standard headers \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}.}
+\item{inputData}{A CSV file with the standard headers \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}.
+Alternatively, a dataframe with those headers.}
 
-\item{poolAs}{What the pooled strain should be named.
-Defaults to \code{NULL}, in which case the strain is just named \emph{Combined}.}
+\item{pool.as}{What the pooled strain should be named. If \code{NULL} (the default), the strain is
+named \emph{Combined}.}
 
-\item{exclude}{A character vector of replicates to skip.}
+\item{exclude.reps}{A character vector of replicates to skip.}
 
-\item{saveAs}{A filename for saving the wrangled file.
-Defaults to \code{NULL}, in which case the original filename will be used.}
+\item{export}{If \code{TRUE}, outputs will also be exported as a CSV.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
 Defaults to \code{FALSE}.}
+
+\item{save.as}{If supplied, the exported file(s) will use this filename. Defaults to \code{NULL}, in
+which case the exported file will retain the filename from the input file.}
+
+\item{export.to}{Where to create the output folder and export the CSV.
+Defaults to the current directory.}
 }
 \value{
-Two tidy CSVs with columns \code{strain}, \code{plate}, \code{fraction}, and \code{CFU}.
+A list of two dataframes named \code{pooledData} and \code{unpooledData}, with columns \code{strain}, \code{plate},
+\code{fraction}, and \code{CFU}.
 }
 \description{
 Prepare CSV files previously wrangled by \code{\link[=wrangle_raw_data]{wrangle_raw_data()}} for the rest of the
@@ -37,7 +46,7 @@ used) can also be prepared for the pipeline with this function.
 }
 \details{
 This function produces two CSV files, one with all replicates pooled into one strain, and another
-CSV with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
+with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
 which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
 }
 \section{Output CSV format}{
@@ -56,8 +65,8 @@ calculated individually for every observation in the raw file.
 }
 
 \examples{
-wrangle_clean_data(dataFile = "./data/raws/FLUCTEST 1 2020 09 24.csv",
-                   poolAs = "AB3",
-                   exclude = c("Rep 0", "Rep 13"),
+wrangle_clean_data(inputData = "./data/raws/FLUCTEST 1 2020 09 24.csv",
+                   pool.as = "AB3",
+                   exclude.reps = c("Rep 0", "Rep 13"),
                    saveAs = "RIF_Aug2023")
 }

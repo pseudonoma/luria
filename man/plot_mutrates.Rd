@@ -2,7 +2,7 @@
 % Please edit documentation in R/export.R
 \name{plot_mutrates}
 \alias{plot_mutrates}
-\title{The core plotting function.}
+\title{The core plotting function}
 \usage{
 plot_mutrates(data, levelOrder, log = NULL)
 }

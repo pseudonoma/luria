@@ -2,13 +2,16 @@
 % Please edit documentation in R/helpers.R
 \name{prep_export}
 \alias{prep_export}
-\title{Helper function for setting up and checking folder structure and pathing.}
+\title{Helper function for setting up and checking folder structure and pathing}
 \usage{
-prep_export(mode = NULL, overwrite = FALSE)
+prep_export(mode = NULL, outputParent, overwrite = FALSE)
 }
 \arguments{
 \item{mode}{Defined by the calling function to determine what output folder is appropriate and
 how to handle it. Takes values \code{"wrangled"}, \code{"analyzed"}, \code{"plots"}, or \code{"mutrates"}.}
+
+\item{outputParent}{Top directory to create the output folders in. Must be supplied by the
+calling functions, but should usually default to the current directory.}
 
 \item{overwrite}{If \code{TRUE}, output file(s) will be saved to the appropriate folder whether or not
 existing file(s) are replaced.
@@ -20,7 +23,7 @@ A string indicating the output folder path.
 \description{
 This function is called by all frontend functions that produce file outputs, namely
 \code{\link[=wrangle_raw_data]{wrangle_raw_data()}}, \code{\link[=wrangle_clean_data]{wrangle_clean_data()}}, \code{\link[=run_fluxxer]{run_fluxxer()}}, and \code{\link[=plot_fluxxer]{plot_fluxxer()}}.
-It always attempts to create the top-level output folder \verb{./output/} whenever it's called,
+It always attempts to create the top-level output folder \verb{/luria_output/} whenever it's called,
 and enforces output folder structure by (a) checking if the output subfolder exists and if
 its contents can be overwritten, and (b) returning the output path for use by the calling
 function so it only has to be defined once. \code{overwrite} is determined by the user in the

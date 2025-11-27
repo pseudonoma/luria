@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{test_logticks}
 \alias{test_logticks}
-\title{Helper function to check for the annotation_logticks error.}
+\title{Helper function to check for the annotation_logticks error}
 \usage{
 test_logticks(data)
 }

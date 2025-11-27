@@ -2,17 +2,17 @@
 % Please edit documentation in R/export.R
 \name{get_template}
 \alias{get_template}
-\title{Save a copy of the fluctuation analysis data template.}
+\title{Save a copy of the fluctuation analysis data template}
 \usage{
-get_template(saveTo = ".", saveAs = "template", version = "latest")
+get_template(version = "latest", save.as = "template", export.to = ".")
 }
 \arguments{
-\item{saveTo}{Path to save the template file. Defaults to the project root.}
-
-\item{saveAs}{Filename to use. The default filename is "template.xlsx".}
-
 \item{version}{Which version of the template to use. Defaults to \code{latest}; \code{old} saves a copy of
 the old template - use this at your own risk.}
+
+\item{save.as}{What the template file will be named. The default is "template".}
+
+\item{export.to}{Where to save the template file. Defaults to current directory.}
 }
 \description{
 Use this function to save a copy of the fluctuation analysis Excel data template.
