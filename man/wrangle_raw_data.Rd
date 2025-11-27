@@ -52,9 +52,9 @@ Wrangle a standard fluctuation analysis Excel workbook template, converting it f
 This function converts raw data contained in an Excel workbook template (obtained by running
 \code{\link[=get_template]{get_template()}}) into a standardized CSV file which is required for downstream processing.
 }
-\section{Output CSV format}{
+\section{Output data format}{
 
-The resulting CSV is a tidy table with four columns:
+The output dataframe has four columns:
 \itemize{
 \item \code{strain} - The name of the replicate
 \item \code{plate} - The type of plate, either \emph{Count} or \emph{Selective}

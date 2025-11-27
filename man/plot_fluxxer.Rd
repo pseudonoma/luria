@@ -33,7 +33,6 @@ Note that this function does not take dataframes.
 }
 \examples{
 plot <- plot_fluxxer(dataPath = "./data/analyzed/wrangled.output.csv",
-                     return.plots = TRUE,
                      overwrite = TRUE)
 
 }

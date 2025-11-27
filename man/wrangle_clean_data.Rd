@@ -45,13 +45,13 @@ pipeline. Correctly-formatted CSVs otherwise created (e.g. if the Excel template
 used) can also be prepared for the pipeline with this function.
 }
 \details{
-This function produces two CSV files, one with all replicates pooled into one strain, and another
-with the replicates kept separate. Both CSV files are tidy tables in a standardized format,
-which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
+This function produces two data frames, one with all replicates pooled into one strain, and
+another with the replicates kept separate. Both CSV files are tidy tables in a standardized
+format, which is required by \code{\link[=run_fluxxer]{run_fluxxer()}}, the next function in the pipeline.
 }
-\section{Output CSV format}{
+\section{Output data format}{
 
-The resulting CSV is a tidy table with four columns:
+The output dataframe has four columns:
 \itemize{
 \item \code{strain} - The name of the replicate
 \item \code{plate} - The type of plate, either \emph{Count} or \emph{Selective}
