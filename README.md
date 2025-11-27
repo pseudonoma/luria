@@ -4,49 +4,54 @@
 # luria
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 This package provides a general framework and data analysis pipeline for
 conducting fluctuation analysis. Its functions are built around a
-modification of the fluxxer.R script written by J. Barrick & D.
-Deatherage, which in turn calls functions from the rSalvador package to
-produce mutation rate estimates and comparisons. It should work fine
-with any microbial system, but was primarily built to work with
-*Escherichia coli* and *Acinetobacter baylyi* experiments in the
-Engelstaedter/Letten group - your mileage with other systems may vary.
+modification of the
+[fluxxer.R](https://github.com/barricklab/barricklab/blob/master/fluxxer.R)
+script written by J. Barrick & D. Deatherage, which in turn calls
+functions from the [rSalvador](https://github.com/eeeeeric/rSalvador)
+package to produce mutation rate estimates and comparisons. It should
+work fine with any microbial system, but was primarily built to work
+with *Escherichia coli* and *Acinetobacter baylyi* experiments in the
+Engelstaedter/Letten group — your mileage with other systems may vary.
 
-The package has slightly more functionality under the hood, so you
-should read the function documentation for more information.
+<!-- The package has slightly more functionality under the hood, so you should read the function documentation for more information. -->
 
 ## Setup
 
-To install the package, run the following lines:
+To install the package, run:
 
 ``` r
 install.packages("devtools")
 devtools::install_github("pseudonoma/luria")
 ```
 
-You may also wish to record your data using the bundled Excel workbook
-template. You can save a copy of the Excel file by running the following
-line, replacing PATH with the folder you want to save the file to:
+*luria* works best when you record your data using the bundled Excel
+workbook template. You can save a copy of the Excel file by running the
+following line, which saves the template to the current folder:
 
 ``` r
-get_template("PATH")
+get_template(export.to = ".")
 ```
 
 The first two sheets of the template are usage guides. Once you’ve read
 them, you can begin recording your data on the empty sheets. These
-sheets are named “Replicate 1” and “Replicate 2”, but you can rename
-them as you please (e.g. to the date of the experiments), copying the
-format to additional sheets as needed.
+example sheets are named “Replicate 1” and “Replicate 2”, but you can
+rename them and add more as needed. It’s best if the rest of the
+replicate sheet names keep to a consistent format (e.g. the date of the
+experiments).
 
 ## Use
 
-The pipeline is split into three sections: wrangling the raw data into a
-pipeline structure, analyzing the data, and finally plotting and/or
-exporting the data. Output files from each section is saved to the
-folder `output/`.
+The pipeline does three things: wrangle the raw data into a
+*luria*-appropriate structure, analyze the data, and finally plot the
+mutation rates. These steps can be done individually by running the
+appropriate functions, but the easiest method is to run the
+`auto_luria()` wrapper function, as it runs all the necessary functions
+in order.
 
 To begin, load the package into the library by running:
 
@@ -54,115 +59,135 @@ To begin, load the package into the library by running:
 library(luria)
 ```
 
-### Part 1 - Wrangling
+### The `auto_luria()` function
 
-Before analysis can begin, your raw data has to be processed into the
-correct format. If your raw data is contained in the Excel workbook
-template, run:
-
-``` r
-wrangle_raw_data("PATH")
-```
-
-replacing PATH with the location of your Excel workbook. By default,
-this assumes that (a) your *Count* populations were diluted
-1:10<sup>5</sup>; and (b) any *Selective* wells missing from the raw
-file were in fact plated but had no growth. If you aren’t using the
-standard design, and for more information on additional options, read
-the documentation by calling `?wrangle_raw_data`.
-
-At this point, your raw data is now a tidy CSV file with column names
-`strain`, `plate`, `fraction`, and `CFU`, and is contained in the folder
-`output/wrangled/`. It needs to be converted into the structure the
-pipeline expects, so run:
+The wrapper function `auto_luria()` takes a template file containing raw
+fluctuation analysis data. To run it, do:
 
 ``` r
-wrangle_clean_data()
+auto_luria(templateData = "template.xlsx",
+           extract.mutrates = FALSE,
+           export = TRUE, 
+           overwrite = FALSE)
 ```
 
-This produces a pair of CSV files, also in `output/wrangled/`: a
-“pooled” file consisting of all your replicates combined into one, and
-an “unpooled” file, where each replicate is kept separate.
+replacing `template.xlsx` with the path of the template file. The first
+two sheets in the template, *Example layout* and *Column guide*, are
+excluded by default, but more sheets can be excluded using the
+`exclude.sheets` argument.
 
-If, for whatever reason, your data is not in the Excel template and is
-instead already in the tidy CSV format with the correct column names,
-you probably already have some experience with this pipeline. In this
-case, you should run `wrangle_clean_data()` but supply the file via the
-`dataFile` argument.
+The default setting assumes that (a) you filled 60 wells per plate; and
+(b) *Count* populations were diluted 1:10<sup>5</sup>. To specify
+different values for these, use the `fill` and `dilution` arguments. Any
+*Selective* wells missing from the template file are also assumed to
+have been plated with no observed growth.
 
-### Part 2 - Analysis
+Wrangled intermediate files are exported as CSVs to a folder
+`\luria_output\` under the current folder, which, if you’re working in
+an R project (you should be), will be the project root. Overwriting is
+disabled by default out of an overabundance of caution, but can be
+enabled by using `overwrite = TRUE`. This is useful if you want to
+process more than one template file by running `auto_luria()` on
+successive template files.
 
-Now that your raw data is processed, obtaining the mutation rate
-estimates is straightforward. Simply run:
+If you aren’t using the standard template for some reason (not
+recommended), or for more information on other `auto_luria()` arguments
+and what the data columns mean, read the documentation by calling
+`?auto_luria` and `?wrangle_raw_data`.
 
-``` r
-run_fluxxer()
-```
+## How the pipeline works
 
-By default, this produces three files, this time saved to
-`output/analyzed/`. Two are the mutation rate estimates from the pooled
-and unpooled data, while the third is a “comparisons” file, containing
-pairwise comparisons of every replicate’s mutation rate estimate.
+`auto_luria()` calls four functions in order: `wrangle_raw_data()`,
+`wrangle_clean_data()`, `run_fluxxer()`, and `plot_fluxxer()`. It also
+runs `extract_mutrates()` at the end if `extract.mutrates = TRUE`. Each
+of these functions can be run individually if you know what you’re
+doing. You should also read the function documentation, as some function
+arguments aren’t explained here.
 
-### Part 3 - Plotting and export
+When run in order, the functions implicitly connect the data produced
+back to the template file they started from, i.e. a *project*;
+subsequent functions try to preserve the filename of that template file
+in the exported files as a *project name*, appending e.g. `_pooled.csv`
+to it. Running the functions out of order might interfere with this
+structure, so do it at your own risk.
 
-The data in `output/analyzed/` can be plotted automatically by running:
+`auto_luria()` can be supplied a folder containing multiple template
+files with `overwrite` also set to `TRUE`. This automatically processes
+each template file as separate projects, but argument values to
+e.g. `fill` will be applied identically to all template files – it only
+makes sense to run it this way if the experiment parameters were
+identical across template files.
 
-``` r
-plot_fluxxer()
-```
+Functions will optionally save intermediate outputs to a subfolder under
+`\luria_output\` if `export = TRUE`. `\luria_output\` is created
+automatically if it doesn’t exist, and resides by default in the current
+directory; this can be changed with the `export.to` argument. Note that
+`export = FALSE` by default when running the functions individually, and
+it may be necessary to set `overwrite = TRUE` to allow some functions to
+save to the necessary folder. Project names can be manually specified by
+the `save.as` argument wherever a function allows it.
 
-This produces a dotplot with both the replicate mutation rates and the
-pooled estimate in a single plot.
+### 1. `wrangle_raw_data()`
 
-Additionally, if you would like to export the pooled mutation rate as an
-RData object for later use (instead of copy-pasting, for example), you
-can extract the pooled estimate by running:
+This converts the template data into a table with four columns named
+`strain`, `plate`, `fraction`, and `CFU`. Past this point, the pipeline
+assumes data inputs are *well-formed*, i.e. it’s in this format. The
+function has default values for `fill` and `dilution` which must be
+changed to match your experimental design. Additionally, *Selective*
+wells missing from the data (up to the value of `fill`) are assumed to
+have been plated but with no growth recorded.
 
-``` r
-extract_mutrates()
-```
+This function takes one template file at a time; separate template files
+can be processed by calling the function again with `overwrite = TRUE`.
 
-Plots and extracted mutation rates are by default saved back into
-`output/analyzed/`.
+### 2. `wrangle_clean_data()`
 
-## A Little More Detail
+This splits the well-formed table into two: one where all the replicates
+are pooled together into one “replicate”, and another where they’re kept
+separate. The former will ultimately produce the mutation rate estimate
+you want. If exported, the CSVs are named `*_pooled.csv` and
+`*_unpooled.csv` respectively.
 
-The package actually implicitly runs in one of two modes: the standard
-pipeline mode described above, and a single-file mode which allows you
-to pass some of the functions individual files without having to follow
-the pipeline format.
+This function again takes one CSV or dataframe at a time supplied to
+`inputData`, but you can process multiple projects individually into the
+same output folder by setting `overwrite = TRUE`.
 
-### Pipeline mode
+### 3. `run_fluxxer()`
 
-When wrangling raw files with `wrangle_raw_data()` or
-`wrangle_clean_data()`, multiple datasets can be wrangled and saved to
-the standard output folder `output/wrangled/`. Each file wrangled this
-way constitutes a “project”; by default the original filename is
-preserved in output files as a “project name”, to which is appended (for
-example) a suffix like `.output` that indicates what kind of output file
-it is. You can change the filename of the wrangled file using the
-`saveAs` argument in either of the `wrangle_` functions.
+This function performs the actual estimation using the
+Barrick/Deatherage code and the rSalvador package. It produces three
+CSVs per project: one each for the pooled and unpooled data, with
+filenames `*.output.csv`; and a third one named `*.comparisons.csv`
+containing pairwise comparisons between the replicates, with p-values
+indicating how different they are from each other. Naturally, only
+unpooled replicates are compared, and setting `comparisons = FALSE` will
+skip this entirely.
 
-In pipeline mode, `run_fluxxer()`, `plot_fluxxer()`, and
-`export_mutrates()` automatically process the appropriate input files by
-project, meaning for example that the file pair
-`fluctest1_unpooled.output.csv` and `fluctest1_pooled.output.csv` is
-understood to belong to the same dataset and are processed together.
+This function takes a list object of pooled/unpooled dataframes returned
+by the previous function, or a folder containing project pairs of
+pooled/unpooled CSVs, running the analysis on each of them. It can also
+take a single dataframe or CSV, in which case it will estimate the
+mutation rate from that data alone regardless of what it is, including
+comparisons.
 
-### Single-file mode
+### 4. `plot_fluxxer()`
 
-The functions `run_fluxxer()`, `plot_fluxxer()`, and
-`extract_mutrates()` can also take individual files via the `file`
-argument, like:
+This function takes the CSVs from the previous function and combines
+pooled/unpooled data by project into a single plot of mutation rate
+estimates. By default it exports plots in PNG and PDF format, and
+returns a ggplot object which can be subsequently modified with the
+usual ggplot functions.
 
-``` r
-run_fluxxer(file = "./data/my_clean_data.csv")
-```
+`plot_fluxxer()` takes a directory containing pooled/unpooled CSV pairs,
+and will automatically match them by project name. Alternatively,
+supplying it a single CSV from the previous function will plot just that
+dataset.
 
-Doing so runs the function in single-file mode, forcing the functions to
-take the input file as-is without assuming there are matched pairs of
-input files ordered by project. This mode is useful if, for example, you
-would like a quick look at your replicate estimates without needing to
-combine them. Naturally, it’s up to you to make sure the input file
-format is valid.
+### 5. `extract_mutrates()`
+
+This is a convenience function intended for exporting mutation rate
+estimates from multiple projects, e.g. for use in modelling; it simply
+looks in `dataPath` for the relevant files, compiles the mutation rates
+into a table, and exports it as a CSV and/or RData file depending on the
+value of `export.method`. `auto_luria()` will run this function if
+`extract.mutrates = TRUE`.
